@@ -1,4 +1,4 @@
-# 📚 Documents - Personal AI Agent Project
+# 📚 Documents - AI Agent Social Automation
 
 > Tài liệu chiến lược cho các AI Agent tự động hóa social media
 

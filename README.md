@@ -1,4 +1,4 @@
-# 🤖 Personal AI Agent - LinkedIn & Facebook Automation
+# 🤖 AI Agent Social Automation
 
 > Tự động hóa nội dung cho LinkedIn & Facebook bằng AI Agent để xây dựng thương hiệu cá nhân và phát triển cộng đồng
 
