@@ -5,50 +5,10 @@
 .claude/scripts/
 .claude/settings.local.json
 
-# Ignore old skills from Java/Spring Boot project (not relevant to AI Agent)
-.claude/skills/_README-quality-docs-status.md
-.claude/skills/api-design.md
-.claude/skills/architecture-overview.md
-.claude/skills/ci-cd-best-practices.md
-.claude/skills/ci-cd-quality-enforcement.md
-.claude/skills/ci-cleanup-workflow.md
-.claude/skills/cloud-infrastructure.md
-.claude/skills/code-style.md
-.claude/skills/cross-service-data-strategy.md
-.claude/skills/database-design.md
-.claude/skills/deployment-quality-standards.md
-.claude/skills/development-workflow.md
-.claude/skills/documentation-structure.md
-.claude/skills/e2e-testing-standards.md
-.claude/skills/email-service.md
-.claude/skills/enums-constants.md
-.claude/skills/environment-setup.md
-.claude/skills/error-logging.md
-.claude/skills/frontend-code-quality.md
-.claude/skills/frontend-development.md
-.claude/skills/frontend-testing-requirements.md
-.claude/skills/ide-problem-check.md
-.claude/skills/ide-testcontainers-warnings.md
-.claude/skills/ide-warnings-best-practices.md
-.claude/skills/kiteclass-backend-testing-patterns.md
-.claude/skills/kiteclass-frontend-testing-patterns.md
-.claude/skills/log-management.md
-.claude/skills/maven-dependencies.md
-.claude/skills/organize.md
-.claude/skills/performance-testing-standards.md
-.claude/skills/plantuml-diagrams.md
-.claude/skills/priority-pr-planning.md
-.claude/skills/project-schedule.md
-.claude/skills/required-knowledge.md
-.claude/skills/security-testing-standards.md
-.claude/skills/setup-github-cli.md
-.claude/skills/skills-compliance-checklist.md
-.claude/skills/spring-boot-testing-quality.md
-.claude/skills/spring-boot-upgrade-checklist.md
-.claude/skills/testing-guide.md
-.claude/skills/troubleshooting.md
+# Reference skills from old project (not tracked)
+.claude/skills-reference/
 
-# Other unrelated folders
+# Other unrelated folders (already deleted)
 .github/
 .vscode/
 .log/
