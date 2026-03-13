@@ -1,0 +1,88 @@
+# AI Agent Social Media Automation - .gitignore
+
+# === Folders from Previous Project (Not Relevant) ===
+# These are from a Java/Spring Boot project, not related to AI Agent
+.claude/
+.github/
+.vscode/
+.log/
+
+# === Credentials & Secrets ===
+# CRITICAL: Never commit API keys or credentials
+.env
+.env.local
+*.key
+*.pem
+credentials.json
+config/secrets.json
+
+# API Keys (common names)
+*_api_key.txt
+*-api-key.json
+anthropic_key
+openai_key
+notion_token
+
+# === Notion & Automation Configs ===
+# May contain sensitive database IDs or tokens
+notion-config.json
+make-config.json
+n8n-config.json
+
+# === Temporary & Cache ===
+*.tmp
+*.log
+*.cache
+.DS_Store
+Thumbs.db
+
+# === Node.js (if using any scripts) ===
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# === Python (if using any scripts) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+*.egg-info/
+
+# === IDEs ===
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS Files ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# === Outputs & Generated Files ===
+output/
+exports/
+*.pdf
+*.zip
+
+# === Canva Exports (can be large) ===
+# Only if you auto-export designs
+designs/exports/
+
+# === Backup Files ===
+*.backup
+*.bak
+*-backup.*
+
+# === Test Data (if sensitive) ===
+test-data/real-*.json
+test-data/production-*.json
