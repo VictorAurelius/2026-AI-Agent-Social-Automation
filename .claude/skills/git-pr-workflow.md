@@ -82,31 +82,52 @@ docs/add-setup-guide
 
 ## ⚠️ Git Rules & Restrictions
 
+### 🚨 CRITICAL ENFORCEMENT: NO DIRECT COMMITS TO MAIN
+
+**ABSOLUTE RULE:**
+```
+❌ NEVER commit directly to main branch
+✅ ALWAYS use branch → PR → merge workflow
+```
+
+**Before ANY commit, AI MUST:**
+1. ✅ Check current branch: `git branch --show-current`
+2. ✅ If on `main`, STOP and create feature branch first
+3. ✅ Only commit when on feature/bugfix/docs branch
+
 ### CRITICAL: Git Operations with GitHub CLI
 
-**✅ WITH GITHUB CLI (`gh`) - AI CAN:**
+**✅ ALLOWED - AI CAN:**
+- Check current branch: `git branch --show-current`
 - Create branches: `git checkout -b feature/new-branch`
-- Commit changes: `git commit -m "message"`
+- Commit changes on feature branches: `git commit -m "message"`
 - Check status: `git status`, `git log`, `gh pr status`
 - Create pull requests: `gh pr create --title "..." --body "..."`
-- Push to remote: `git push origin <branch>` (after user confirmation)
+- Push feature branches: `git push origin <feature-branch>` (after user confirmation)
 
-**❌ FORBIDDEN OPERATIONS:**
-- Force push: `git push --force` (NEVER without explicit user request)
-- Push to main directly: `git push origin main` (use PR workflow)
-- Destructive operations: `git reset --hard`, `git clean -f`
-- Amend commits without user approval: `git commit --amend`
+**❌ ABSOLUTELY FORBIDDEN:**
+- ❌ Commit to main: `git commit` when on main branch
+- ❌ Push to main directly: `git push origin main`
+- ❌ Force push: `git push --force` (NEVER without explicit user request)
+- ❌ Destructive operations: `git reset --hard`, `git clean -f`
+- ❌ Amend commits without user approval: `git commit --amend`
 
-**⏳ WORKFLOW:**
-1. AI: Create feature branch: `git checkout -b feature/branch-name`
-2. AI: Implement feature → commit locally
-3. AI: Ask user: "Ready to push to remote and create PR?"
-4. **User**: Confirm "yes" or request changes
-5. AI: Push to remote: `git push -u origin feature/branch`
-6. AI: Create PR: `gh pr create --title "..." --body "..."`
-7. AI: Return PR URL to user
+**⏳ MANDATORY WORKFLOW:**
+1. AI: Check branch: `git branch --show-current`
+2. AI: If on main → Create feature branch: `git checkout -b bugfix/issue-name`
+3. AI: Implement fix/feature → commit locally on feature branch
+4. AI: Ask user: "Ready to push to remote and create PR?"
+5. **User**: Confirm "yes" or request changes
+6. AI: Push to remote: `git push -u origin feature/branch`
+7. AI: Create PR: `gh pr create --title "..." --body "..."`
+8. AI: Return PR URL to user
+9. **User**: Review PR → Merge via GitHub UI
+10. AI: After merge, cleanup: `git checkout main && git pull && git branch -d feature/branch`
 
-**IMPORTANT:** Always ask before pushing to remote, even with GitHub CLI
+**IMPORTANT:**
+- Always ask before pushing to remote, even with GitHub CLI
+- Never skip branch creation step
+- Every change MUST go through PR review
 
 ---
 
