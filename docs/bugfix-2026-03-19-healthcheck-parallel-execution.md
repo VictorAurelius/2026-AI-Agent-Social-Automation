@@ -56,65 +56,83 @@ But "Check Postgres" hasn't executed yet in that execution context, causing the 
 
 ## Solution
 
-### Add Merge Node to Wait for All Checks
+### Use Sequential Execution Instead of Parallel
 
-**New workflow structure:**
+**Initial attempt:** Used Merge node with parallel execution, but encountered Merge v3 configuration error requiring field matching parameters.
+
+**Final solution:** Restructured workflow to use sequential execution:
+
 ```
-Every 5 Min
-  ├─> Check Ollama ──┐
-  ├─> Check Postgres ├─> Merge ──> Evaluate ──> Is Healthy?
-  └─> Check Redis ───┘
+Every 5 Min → Check Ollama → Check Postgres → Check Redis → Evaluate → Is Healthy?
 ```
 
-**How Merge Node Works:**
-- Waits for all three parallel inputs to complete
-- Combines data from all branches into single execution context
-- Triggers downstream node (Evaluate) only once with all data available
-- Mode: "combine" with "multiplex" combination mode
+**Why Sequential Works:**
+- Each health check executes after the previous one completes
+- When Evaluate runs, all three checks have already executed in sequence
+- Node references `$('Check Ollama')`, `$('Check Postgres')`, `$('Check Redis')` all work correctly
+- Simple, reliable, no Merge configuration complexity
+
+**Trade-off:**
+- Sequential is slightly slower than parallel (~1-2 seconds total)
+- For a healthcheck running every 5 minutes, this is acceptable
+- Simplicity and reliability outweigh minor performance difference
 
 **Changed File:** `workflows/n8n/healthcheck.json`
 
-### 1. Added Merge Node
+### 1. Restructured to Sequential Connections
 
-**Position:** [600, 380] (between checks and evaluate)
-
+**Before (parallel - caused error):**
 ```json
-{
-  "parameters": {
-    "mode": "combine",
-    "combinationMode": "multiplex",
-    "options": {}
-  },
-  "id": "merge",
-  "name": "Merge",
-  "type": "n8n-nodes-base.merge",
-  "typeVersion": 3,
-  "position": [600, 380]
-}
+"Every 5 Min": {"main": [[
+  {"node": "Check Ollama", "type": "main", "index": 0},
+  {"node": "Check Postgres", "type": "main", "index": 0},
+  {"node": "Check Redis", "type": "main", "index": 0}
+]]}
 ```
 
-### 2. Updated Node Positions
-
-- Evaluate node moved from [720, 380] to [780, 380] (shift right for merge node)
-
-### 3. Updated Connections
-
-**Before:**
+**After (sequential - works):**
 ```json
-"Check Ollama": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
-"Check Postgres": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+"Every 5 Min": {"main": [[{"node": "Check Ollama", "type": "main", "index": 0}]]},
+"Check Ollama": {"main": [[{"node": "Check Postgres", "type": "main", "index": 0}]]},
+"Check Postgres": {"main": [[{"node": "Check Redis", "type": "main", "index": 0}]]},
 "Check Redis": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]}
 ```
 
-**After:**
-```json
-"Check Ollama": {"main": [[{"node": "Merge", "type": "main", "index": 0}]]},
-"Check Postgres": {"main": [[{"node": "Merge", "type": "main", "index": 1}]]},
-"Check Redis": {"main": [[{"node": "Merge", "type": "main", "index": 2}]]},
-"Merge": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]}
+### 2. Updated Node Positions (Sequential Layout)
+
+- Check Ollama: [400, 380] (moved from [480, 220])
+- Check Postgres: [560, 380] (moved from [480, 380])
+- Check Redis: [720, 380] (moved from [480, 540])
+- Evaluate: [880, 380] (moved from [720, 380])
+
+All nodes now on same Y position (380) for clean sequential layout.
+
+### 3. Enhanced Evaluate to Include Redis
+
+**Added Redis check:**
+```javascript
+const redisResult = $('Check Redis').first();
+const redisOk = !redisResult.error;
+const allHealthy = ollamaOk && postgresOk && redisOk;  // Now checks all 3
 ```
 
-**Note:** Each check connects to different merge input index (0, 1, 2)
+**Updated output to include all three services:**
+```javascript
+return [{
+  json: {
+    ollama: ollamaOk,
+    postgres: postgresOk,
+    redis: redisOk,      // NEW
+    allHealthy,
+    timestamp
+  }
+}];
+```
+
+### 4. Updated Logging and Alerts
+
+- **Log Error query:** Now includes redis status in details JSON
+- **Alert message:** Now shows Redis health status alongside Ollama and PostgreSQL
 
 ## Verification Steps
 
@@ -130,84 +148,85 @@ Every 5 Min
    - Verify no errors
    - Check all nodes execute successfully
 
-3. **Verify Merge node behavior:**
-   - Check execution log shows Merge waits for all three inputs
-   - Evaluate node executes only once after Merge completes
+3. **Verify sequential execution:**
+   - Check execution log shows nodes execute in order: Ollama → Postgres → Redis → Evaluate
+   - Evaluate node executes only once after all checks complete
    - All three health check results available in Evaluate context
 
 4. **Test error handling:**
-   - Stop PostgreSQL: `cd docker && docker-compose stop postgres`
+   - Stop PostgreSQL: `bash scripts/restart-services.sh postgres` (to stop)
    - Execute workflow
    - Verify Evaluate handles error correctly (continues with error data)
-   - Restart PostgreSQL: `cd docker && docker-compose start postgres`
+   - Verify Alert sent with Postgres showing as DOWN
+   - Restart PostgreSQL: `bash scripts/restart-services.sh postgres`
 
-## Why This Pattern Is Needed
+## Why Sequential Execution Works
 
-**When to Use Merge Node:**
+**Sequential vs Parallel for Healthchecks:**
 
-Use Merge when you have:
-1. Multiple parallel nodes
-2. All connecting to same downstream node
-3. Downstream node needs data from ALL parallel nodes
+**Sequential (our solution):**
+- ✅ Simple: No Merge configuration needed
+- ✅ Reliable: Each node executes once in predictable order
+- ✅ Node references work: `$('NodeName')` works for all previous nodes
+- ❌ Slower: Adds 1-2 seconds total (acceptable for 5-minute intervals)
 
-**Without Merge:**
-- Downstream node executes N times (once per input)
-- Each execution only sees data from one branch
-- Cannot access data from parallel branches
+**Parallel with Merge (attempted):**
+- ✅ Faster: All checks run simultaneously
+- ❌ Complex: Requires proper Merge v3 configuration
+- ❌ Error-prone: Field matching parameters, mode configuration
+- ❌ Overkill: For simple healthcheck use case
 
-**With Merge:**
-- Downstream node executes once
-- Can access data from all parallel branches
-- Proper synchronization of parallel execution
+**When to Use Each:**
+- **Sequential:** Simple workflows, acceptable latency, reliability priority
+- **Parallel:** Complex workflows, latency critical, worth configuration complexity
 
 ## Related n8n Concepts
 
 **Node References `$('NodeName')`:**
-- Only works for nodes executed BEFORE current node
+- Only works for nodes executed BEFORE current node in execution path
 - Searches in current execution context
-- Parallel branches have separate contexts until merged
+- In sequential execution: all previous nodes are accessible
+- In parallel execution: only nodes in same branch are accessible (unless merged)
 
 **onError: "continueRegularOutput":**
 - Health check nodes continue even if they fail
-- Error data passed to Merge node
-- Evaluate node can check for errors in results
+- Error data passed to next node
+- Evaluate node can check for errors in results via `.error` property
 
 **Execution Order:**
 - Settings: `"executionOrder": "v1"`
-- Controls how n8n handles parallel execution
-- v1 is default, supports merge patterns
+- Controls how n8n handles workflow execution
+- Sequential execution follows simple linear path
 
 ## Lessons Learned
 
 **Key Insight:**
-> n8n parallel execution requires explicit synchronization with Merge node when downstream nodes need all parallel results
+> For simple healthcheck workflows, sequential execution is more reliable than parallel with Merge
 
-**Pattern to Remember:**
+**Pattern Used:**
 ```
-Parallel Nodes → Merge Node → Processing Node
-```
-
-**Always use Merge when:**
-- Multiple parallel API calls need combined results
-- Parallel database queries need to be processed together
-- Any workflow where downstream logic depends on ALL parallel outputs
-
-**Alternative Approach (Not Chosen):**
-Could restructure workflow to execute checks sequentially instead of parallel:
-```
-Check Ollama → Check Postgres → Check Redis → Evaluate
+Trigger → Check 1 → Check 2 → Check 3 → Evaluate → Conditional Logic
 ```
 
-**Pros:**
-- No merge needed
-- Simpler structure
+**Why This Works:**
+- Each node completes before next starts
+- All previous nodes accessible via `$('NodeName')`
+- No synchronization complexity
+- Predictable execution order
 
-**Cons:**
-- Slower (sequential vs parallel)
-- Total time = sum of all check times
-- Less efficient for independent operations
+**When to Use Sequential:**
+- Simple workflows with few nodes
+- Node references needed for all checks
+- Reliability more important than speed
+- Total execution time is acceptable
 
-**Our Choice:** Parallel with Merge for better performance
+**When to Use Parallel (with proper Merge):**
+- Many independent API calls
+- Latency is critical concern
+- Worth the Merge configuration complexity
+- Execution time matters more than simplicity
+
+**Our Choice:** Sequential for simplicity and reliability. For a healthcheck running every 5 minutes, the extra 1-2 seconds is negligible.
 
 ## Related Issues
 

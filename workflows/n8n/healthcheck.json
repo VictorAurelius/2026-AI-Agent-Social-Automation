@@ -22,7 +22,7 @@
       "name": "Check Ollama",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [480, 220],
+      "position": [400, 380],
       "onError": "continueRegularOutput"
     },
     {
@@ -34,7 +34,7 @@
       "name": "Check Postgres",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [480, 380],
+      "position": [560, 380],
       "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}},
       "onError": "continueRegularOutput"
     },
@@ -47,31 +47,19 @@
       "name": "Check Redis",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [480, 540],
+      "position": [720, 380],
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combinationMode": "multiplex",
-        "options": {}
-      },
-      "id": "merge",
-      "name": "Merge",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3,
-      "position": [600, 380]
-    },
-    {
-      "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const ollamaResult = $('Check Ollama').first();\nconst postgresResult = $('Check Postgres').first();\n\nconst ollamaOk = !ollamaResult.error && ollamaResult.json.models !== undefined;\nconst postgresOk = !postgresResult.error && postgresResult.json.health === 1;\n\nconst allHealthy = ollamaOk && postgresOk;\nconst timestamp = new Date().toISOString();\n\nreturn [{\n  json: {\n    ollama: ollamaOk,\n    postgres: postgresOk,\n    allHealthy,\n    timestamp\n  }\n}];"
+        "jsCode": "const ollamaResult = $('Check Ollama').first();\nconst postgresResult = $('Check Postgres').first();\nconst redisResult = $('Check Redis').first();\n\nconst ollamaOk = !ollamaResult.error && ollamaResult.json.models !== undefined;\nconst postgresOk = !postgresResult.error && postgresResult.json.health === 1;\nconst redisOk = !redisResult.error;\n\nconst allHealthy = ollamaOk && postgresOk && redisOk;\nconst timestamp = new Date().toISOString();\n\nreturn [{\n  json: {\n    ollama: ollamaOk,\n    postgres: postgresOk,\n    redis: redisOk,\n    allHealthy,\n    timestamp\n  }\n}];"
       },
       "id": "evaluate",
       "name": "Evaluate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [780, 380]
+      "position": [880, 380]
     },
     {
       "parameters": {
@@ -109,7 +97,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO workflow_logs (workflow_name, status, message, details) VALUES ('healthcheck', 'error', 'Service unhealthy at {{ $json.timestamp }}', '{{ JSON.stringify({ollama: $json.ollama, postgres: $json.postgres}) }}')"
+        "query": "INSERT INTO workflow_logs (workflow_name, status, message, details) VALUES ('healthcheck', 'error', 'Service unhealthy at {{ $json.timestamp }}', '{{ JSON.stringify({ollama: $json.ollama, postgres: $json.postgres, redis: $json.redis}) }}')"
       },
       "id": "log-error",
       "name": "Log Error",
@@ -122,7 +110,7 @@
       "parameters": {
         "operation": "sendMessage",
         "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
-        "text": "=\ud83d\udea8 *Service Health Alert*\n\n*Time:* {{ $json.timestamp }}\n\n*Service Status:*\n\u2022 Ollama: {{ $json.ollama ? '\u2705 Healthy' : '\u274c DOWN' }}\n\u2022 PostgreSQL: {{ $json.postgres ? '\u2705 Healthy' : '\u274c DOWN' }}\n\n\u26a0\ufe0f _Please check immediately!_",
+        "text": "=\ud83d\udea8 *Service Health Alert*\n\n*Time:* {{ $json.timestamp }}\n\n*Service Status:*\n\u2022 Ollama: {{ $json.ollama ? '\u2705 Healthy' : '\u274c DOWN' }}\n\u2022 PostgreSQL: {{ $json.postgres ? '\u2705 Healthy' : '\u274c DOWN' }}\n\u2022 Redis: {{ $json.redis ? '\u2705 Healthy' : '\u274c DOWN' }}\n\n\u26a0\ufe0f _Please check immediately!_",
         "additionalFields": {"parse_mode": "Markdown"}
       },
       "id": "alert",
@@ -134,15 +122,10 @@
     }
   ],
   "connections": {
-    "Every 5 Min": {"main": [[
-      {"node": "Check Ollama", "type": "main", "index": 0},
-      {"node": "Check Postgres", "type": "main", "index": 0},
-      {"node": "Check Redis", "type": "main", "index": 0}
-    ]]},
-    "Check Ollama": {"main": [[{"node": "Merge", "type": "main", "index": 0}]]},
-    "Check Postgres": {"main": [[{"node": "Merge", "type": "main", "index": 1}]]},
-    "Check Redis": {"main": [[{"node": "Merge", "type": "main", "index": 2}]]},
-    "Merge": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Every 5 Min": {"main": [[{"node": "Check Ollama", "type": "main", "index": 0}]]},
+    "Check Ollama": {"main": [[{"node": "Check Postgres", "type": "main", "index": 0}]]},
+    "Check Postgres": {"main": [[{"node": "Check Redis", "type": "main", "index": 0}]]},
+    "Check Redis": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
     "Evaluate": {"main": [[{"node": "Is Healthy?", "type": "main", "index": 0}]]},
     "Is Healthy?": {
       "main": [
