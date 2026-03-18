@@ -52,6 +52,18 @@
     },
     {
       "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "merge",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [600, 380]
+    },
+    {
+      "parameters": {
         "mode": "runOnceForAllItems",
         "jsCode": "const ollamaResult = $('Check Ollama').first();\nconst postgresResult = $('Check Postgres').first();\n\nconst ollamaOk = !ollamaResult.error && ollamaResult.json.models !== undefined;\nconst postgresOk = !postgresResult.error && postgresResult.json.health === 1;\n\nconst allHealthy = ollamaOk && postgresOk;\nconst timestamp = new Date().toISOString();\n\nreturn [{\n  json: {\n    ollama: ollamaOk,\n    postgres: postgresOk,\n    allHealthy,\n    timestamp\n  }\n}];"
       },
@@ -59,7 +71,7 @@
       "name": "Evaluate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 380]
+      "position": [780, 380]
     },
     {
       "parameters": {
@@ -127,9 +139,10 @@
       {"node": "Check Postgres", "type": "main", "index": 0},
       {"node": "Check Redis", "type": "main", "index": 0}
     ]]},
-    "Check Ollama": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
-    "Check Postgres": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
-    "Check Redis": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Check Ollama": {"main": [[{"node": "Merge", "type": "main", "index": 0}]]},
+    "Check Postgres": {"main": [[{"node": "Merge", "type": "main", "index": 1}]]},
+    "Check Redis": {"main": [[{"node": "Merge", "type": "main", "index": 2}]]},
+    "Merge": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
     "Evaluate": {"main": [[{"node": "Is Healthy?", "type": "main", "index": 0}]]},
     "Is Healthy?": {
       "main": [
