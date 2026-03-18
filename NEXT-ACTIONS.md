@@ -1,13 +1,13 @@
 # Next Actions - AI Agent Social Automation
 
-**Last Updated:** 2026-03-16
-**Project Status:** 🔄 Phase 1 In Progress - Ready for Docker Setup on New Machine
+**Last Updated:** 2026-03-19
+**Project Status:** ✅ Phase 1 Complete - Ready for Workflow Configuration
 
 ---
 
 ## 📍 Current Progress
 
-### Phase 1: Infrastructure (Week 1-2) - 80% Complete
+### Phase 1: Infrastructure (Week 1-2) - ✅ 100% Complete
 
 | Task | Status | Description |
 |------|--------|-------------|
@@ -15,7 +15,7 @@
 | Task 1.2 | ✅ Done | Database schema + seed data |
 | Task 1.3 | ✅ Done | Helper scripts (setup, backup, healthcheck) |
 | Task 1.4 | ✅ Done | Telegram bot configuration guide |
-| Task 1.5 | ⏳ Pending | **Verify infrastructure setup** |
+| Task 1.5 | ✅ Done | **Infrastructure verified and running** |
 
 ### Files Created:
 
@@ -30,9 +30,12 @@ docker/
     └── 02-seed-prompts.sql # 4 prompts, 10 topics
 
 scripts/
-├── setup.sh                # Automated Docker setup
+├── setup.sh                # Automated Docker setup (with retry logic)
 ├── backup.sh               # Daily backup with retention
-└── healthcheck.sh          # Service health monitoring
+├── healthcheck.sh          # Service health monitoring
+├── pull-model.sh           # Pull Llama 3.1 8B model
+├── import-n8n.sh           # Import workflows via API (requires auth)
+└── install-workflows.sh    # Install workflows via CLI
 
 docs/superpowers/
 ├── specs/
@@ -41,86 +44,93 @@ docs/superpowers/
     └── 2026-03-16-production-release-plan.md
 ```
 
+docs/
+└── n8n-setup-guide.md      # Step-by-step n8n configuration
+
+```
+
 ---
 
-## 🚀 NEXT: Task 1.5 - Verify Infrastructure Setup
+## ✅ Infrastructure Status
 
-### System Requirements
+**All services healthy:**
+- ✅ n8n: Running on http://localhost:5678
+- ✅ PostgreSQL: 10 topics + 4 prompts loaded
+- ✅ Ollama: Llama 3.1 8B (4.9GB) ready
+- ✅ Redis: Running
 
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| **RAM** | 16 GB | 24-32 GB |
-| **Disk** | 15 GB | 30 GB |
-| **CPU** | 4 cores | 8+ cores |
-| **Docker** | Required | Docker CE or Desktop |
+**Resource usage:**
+- Memory: ~485MB total
+- Disk: 7.4GB used
 
-### WSL2 Configuration (if using Windows)
+---
 
-Create `C:\Users\<YourName>\.wslconfig`:
-```ini
-[wsl2]
-memory=24GB
-processors=6
-```
+## 🚀 NEXT: Task 2.1 - Configure n8n Workflows
 
-Then restart: `wsl --shutdown`
+**Goal:** Import and configure 4 n8n workflows
 
-### Setup Steps
+**Reference:** See detailed guide at `docs/n8n-setup-guide.md`
 
-```bash
-# 1. Clone repo (if new machine)
-git clone https://github.com/VictorAurelius/2026-AI-Agent-Social-Automation.git
-cd 2026-AI-Agent-Social-Automation
+### Quick Steps
 
-# 2. Install Docker (if not installed)
-sudo apt update
-sudo apt install docker.io docker-compose -y
-sudo usermod -aG docker $USER
-sudo service docker start
+1. **Open n8n UI:** http://localhost:5678
 
-# 3. Setup environment
-cd docker
-cp .env.example .env
-nano .env  # Edit with your passwords
+2. **Create PostgreSQL Credential:**
+   - Go to Credentials → Add Credential → Postgres
+   - Name: `Social Automation DB`
+   - Host: `postgres` (NOT localhost!)
+   - Port: `5432`
+   - Database: `social_automation`
+   - User: `postgres`
+   - Password: `hWNxJiw0n+H7A1uRQnZ37dXa8zEjWdbLgt/whe5CZAY=`
+   - Test connection → Save
 
-# 4. Run setup script
-cd ..
-./scripts/setup.sh
+3. **Import Workflows:**
+   Navigate to Workflows → Import from File → Select files from:
+   ```
+   F:\2026-AI-Agent-Social-Automation\workflows\n8n\
+   ```
 
-# 5. Verify
-./scripts/healthcheck.sh
-```
+   Import in order:
+   - ✅ `content-generate.json` (Manual trigger - don't activate)
+   - ✅ `batch-generate.json` (Activate - runs Mon/Wed/Fri 8AM)
+   - ✅ `daily-digest.json` (Activate - runs daily 9AM)
+   - ✅ `healthcheck.json` (Activate - runs every 5min)
+
+4. **Verify Setup:**
+   ```bash
+   bash scripts/healthcheck.sh
+   ```
 
 ### Verification Checklist
 
-- [ ] Docker installed and running
-- [ ] All 4 containers healthy (n8n, postgres, ollama, redis)
-- [ ] Llama 3.1 8B model downloaded
-- [ ] n8n accessible at http://localhost:5678
-- [ ] PostgreSQL has 5 tables + seed data
-- [ ] Telegram bot created and token saved
+- [ ] PostgreSQL credential created and tested
+- [ ] 4 workflows imported successfully
+- [ ] Workflows linked to PostgreSQL credential
+- [ ] Batch, digest, and healthcheck workflows activated
+- [ ] Test content-generate workflow manually
 
 ---
 
 ## 📅 Remaining Tasks
 
-### Phase 1: Infrastructure (Week 1-2)
-- [ ] **Task 1.5**: Verify infrastructure setup
-
-### Phase 2: Core Workflows (Week 3-4)
-- [ ] Task 2.1: Create content-generate workflow
-- [ ] Task 2.2: Create batch-generate workflow
-- [ ] Task 2.3: Create daily-digest workflow
-- [ ] Task 2.4: Create healthcheck workflow
+### Phase 2: Core Workflows (Week 3-4) - In Progress
+- [ ] **Task 2.1**: Configure n8n workflows (CURRENT)
+- [x] Task 2.2: content-generate workflow (created)
+- [x] Task 2.3: batch-generate workflow (created)
+- [x] Task 2.4: daily-digest workflow (created)
+- [x] Task 2.5: healthcheck workflow (created)
 
 ### Phase 3: LinkedIn MVP (Week 5-6)
-- [ ] Task 3.1: Content pillar documentation
-- [ ] Task 3.2: Create runbook
+- [ ] Task 3.1: Content pillar documentation (already exists at docs/content-pillars.md)
+- [ ] Task 3.2: Test content generation
+- [ ] Task 3.3: Refine prompts based on output quality
 
 ### Phase 4: Stabilization (Week 7-8)
-- [ ] Monitoring & alerts
-- [ ] Backup testing
-- [ ] 30-day stability run
+- [ ] Monitor workflow execution for 1 week
+- [ ] Setup Telegram notifications (optional)
+- [ ] Test backup/restore procedures
+- [ ] Document operational procedures
 
 ---
 
@@ -128,33 +138,46 @@ cd ..
 
 | Document | Path |
 |----------|------|
-| Design Spec | `docs/superpowers/specs/2026-03-16-production-release-design.md` |
-| Implementation Plan | `docs/superpowers/plans/2026-03-16-production-release-plan.md` |
+| **n8n Setup Guide** | `docs/n8n-setup-guide.md` ⭐ |
+| **Operations Runbook** | `docs/runbook.md` |
+| **Content Pillars** | `docs/content-pillars.md` |
 | Docker Setup | `docker/README.md` |
 | Telegram Guide | `docker/telegram-config.md` |
 | Tech Stack | `documents/tech-stack/overview.md` |
+| Design Spec | `docs/superpowers/specs/2026-03-16-production-release-design.md` |
+| Implementation Plan | `docs/superpowers/plans/2026-03-16-production-release-plan.md` |
 
 ---
 
 ## 💡 Quick Commands
 
 ```bash
-# Start services
-cd docker && docker-compose up -d
+# Start all services
+bash scripts/setup.sh
 
-# Check health
-./scripts/healthcheck.sh
+# Check system health
+bash scripts/healthcheck.sh
+
+# Pull Llama model (if needed)
+bash scripts/pull-model.sh
 
 # View logs
-docker-compose logs -f
+cd docker && docker-compose logs -f
 
-# Backup
-./scripts/backup.sh
+# View specific service logs
+docker-compose logs -f n8n
+docker-compose logs -f ollama
 
-# Stop services
+# Backup database
+bash scripts/backup.sh
+
+# Restart specific service
+cd docker && docker-compose restart n8n
+
+# Stop all services
 cd docker && docker-compose down
 ```
 
 ---
 
-**Last Updated:** 2026-03-16 (Task 1.4 completed)
+**Last Updated:** 2026-03-19 (Phase 1 Complete - Task 1.5 done, Task 2.1 in progress)

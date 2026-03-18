@@ -89,6 +89,33 @@ if grep -q "your_secure_password_here" .env 2>/dev/null; then
     exit 1
 fi
 
+# Pull Docker images with retry
+print_step "Pulling Docker images..."
+echo "This may take several minutes depending on your connection..."
+echo ""
+
+cd "$DOCKER_DIR"
+MAX_RETRIES=3
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    echo "Attempt $((RETRY_COUNT + 1))/$MAX_RETRIES..."
+    if docker-compose pull; then
+        echo -e "${GREEN}✓ Images pulled successfully${NC}"
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo -e "${YELLOW}⚠️  Pull failed, retrying in 5 seconds...${NC}"
+            sleep 5
+        else
+            echo -e "${RED}ERROR: Failed to pull images after $MAX_RETRIES attempts${NC}"
+            echo "Please check your internet connection and try again"
+            exit 1
+        fi
+    fi
+done
+
 # Start Docker services
 print_step "Starting Docker services..."
 docker-compose up -d
@@ -127,8 +154,14 @@ echo ""
 if docker exec ollama ollama list 2>/dev/null | grep -q "llama3.1:8b"; then
     echo -e "${GREEN}✓ Model already downloaded${NC}"
 else
-    docker exec -it ollama ollama pull llama3.1:8b
-    echo -e "${GREEN}✓ Model downloaded successfully${NC}"
+    docker exec ollama ollama pull llama3.1:8b
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Model downloaded successfully${NC}"
+    else
+        echo -e "${RED}ERROR: Failed to download model${NC}"
+        echo "You can manually download it later with:"
+        echo "  docker exec ollama ollama pull llama3.1:8b"
+    fi
 fi
 
 # Verify setup
