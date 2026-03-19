@@ -161,7 +161,17 @@ Nội dung được lưu với status `pending_review`. Bạn cần:
 
 ---
 
-## WF2: Batch Generate
+## WF2: Batch Generate (Multi-Platform)
+
+> **Update:** WF2 now supports all 3 platforms (LinkedIn, Facebook Tech, Facebook Chinese).
+> Pillar-to-platform mapping is automatic. LIMIT increased from 3 to 5 topics per batch.
+>
+> **Pillar mapping:**
+> | Pillar | Platform |
+> |--------|----------|
+> | `tech_insights`, `career_productivity`, `product_project`, `personal_stories` | `linkedin` |
+> | `tech_news`, `tutorials`, `tools_tips`, `community` | `facebook_tech` |
+> | `vocabulary`, `grammar`, `culture`, `practice` | `facebook_chinese` |
 
 ### Mục đích
 
@@ -170,8 +180,9 @@ Tự động tạo **nhiều bài viết** cùng lúc từ danh sách topic idea
 ### Khi nào dùng?
 
 - Workflow này chạy tự động, bạn không cần trigger
-- Tạo 3 bài/tuần (Mon/Wed/Fri)
+- Tạo tối đa 5 bài/batch (Mon/Wed/Fri) cho cả 3 platforms
 - Lấy topic từ bảng `topic_ideas` theo thứ tự ưu tiên
+- Platform được tự động xác định từ pillar của topic
 
 ### Sơ đồ luồng
 
@@ -179,7 +190,7 @@ Tự động tạo **nhiều bài viết** cùng lúc từ danh sách topic idea
 [1. Cron: Mon/Wed/Fri 8AM]
       │
       ▼
-[2. Get Topics] ── Lấy 3 topics chưa dùng từ DB
+[2. Get Topics] ── Lấy 5 topics chưa dùng từ DB
       │               (ORDER BY priority ASC)
       ▼
 [3. Loop Topics] ── Xử lý từng topic một
@@ -231,9 +242,9 @@ Tự động tạo **nhiều bài viết** cùng lúc từ danh sách topic idea
   FROM topic_ideas
   WHERE used = false
   ORDER BY priority ASC
-  LIMIT 3
+  LIMIT 5
   ```
-- **Giải thích:** Lấy 3 topic chưa dùng, ưu tiên số nhỏ nhất (priority 1 = quan trọng nhất)
+- **Giải thích:** Lấy 5 topic chưa dùng, ưu tiên số nhỏ nhất (priority 1 = quan trọng nhất). Platform được tự động map từ pillar
 - **Lưu ý:** Nếu không còn topic nào (`used = false`), workflow sẽ không tạo gì
 
 #### Node 3: Loop Topics
@@ -558,7 +569,7 @@ Ollama → PostgreSQL → Redis → Evaluate
 | Workflow | Trigger | Tần suất | Mục đích | Cần activate? |
 |----------|---------|----------|----------|---------------|
 | WF1 | Manual | Khi cần | Tạo 1 bài theo yêu cầu | Không (manual) |
-| WF2 | Cron | Mon/Wed/Fri 8AM | Tạo batch 3 bài | Có |
+| WF2 | Cron | Mon/Wed/Fri 8AM | Tạo batch 5 bài (multi-platform) | Có |
 | WF3 | Cron | Hàng ngày 9AM | Báo cáo tổng hợp | Có |
 | WF5 | Cron | Mỗi 5 phút | Giám sát services | Có |
 

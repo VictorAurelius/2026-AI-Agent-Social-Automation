@@ -1,5 +1,5 @@
 {
-  "name": "WF2: Batch Generate",
+  "name": "WF2: Batch Generate (Multi-Platform)",
   "nodes": [
     {
       "parameters": {
@@ -18,7 +18,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id, topic, pillar, notes FROM topic_ideas WHERE used = false ORDER BY priority ASC LIMIT 3"
+        "query": "SELECT id, topic, pillar, notes FROM topic_ideas WHERE used = false ORDER BY priority ASC LIMIT 5"
       },
       "id": "get-topics",
       "name": "Get Topics",
@@ -56,7 +56,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const topic = $('Loop Topics').first().json;\nconst prompt = $input.first().json;\n\nlet userPrompt = prompt.user_prompt_template;\nuserPrompt = userPrompt.replace('{{topic}}', topic.topic);\nuserPrompt = userPrompt.replace('{{context}}', topic.notes || '');\n\nreturn [{\n  json: {\n    topic_id: topic.id,\n    system_prompt: prompt.system_prompt,\n    user_prompt: userPrompt,\n    topic: topic.topic,\n    pillar: topic.pillar\n  }\n}];"
+        "jsCode": "const topic = $('Loop Topics').first().json;\nconst prompt = $input.first().json;\n\n// Map pillar to platform\nfunction getPlatform(pillar) {\n  const mapping = {\n    'tech_insights': 'linkedin',\n    'career_productivity': 'linkedin',\n    'product_project': 'linkedin',\n    'personal_stories': 'linkedin',\n    'tech_news': 'facebook_tech',\n    'tutorials': 'facebook_tech',\n    'tools_tips': 'facebook_tech',\n    'community': 'facebook_tech',\n    'vocabulary': 'facebook_chinese',\n    'grammar': 'facebook_chinese',\n    'culture': 'facebook_chinese',\n    'practice': 'facebook_chinese'\n  };\n  return mapping[pillar] || 'linkedin';\n}\n\nlet userPrompt = prompt.user_prompt_template;\nuserPrompt = userPrompt.replace('{{topic}}', topic.topic);\nuserPrompt = userPrompt.replace('{{context}}', topic.notes || '');\n\nreturn [{\n  json: {\n    topic_id: topic.id,\n    system_prompt: prompt.system_prompt,\n    user_prompt: userPrompt,\n    topic: topic.topic,\n    pillar: topic.pillar,\n    platform: getPlatform(topic.pillar)\n  }\n}];"
       },
       "id": "prepare",
       "name": "Prepare",
@@ -82,7 +82,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "// SQL escape helper function\nfunction escapeSql(str) {\n  if (!str) return '';\n  return str.replace(/'/g, \"''\");\n}\n\nconst ollamaResponse = $input.first().json;\nconst preparedData = $('Prepare').first().json;\n\nconst content = ollamaResponse.message?.content || 'Generation failed - no content returned';\n\nreturn [{\n  json: {\n    topic_id: preparedData.topic_id,\n    title: escapeSql(preparedData.topic),\n    platform: escapeSql('linkedin'),\n    pillar: escapeSql(preparedData.pillar),\n    content_type: escapeSql('thought_leadership'),\n    generated_content: escapeSql(content),\n    status: escapeSql('pending_review')\n  }\n}];"
+        "jsCode": "function escapeSql(str) {\n  if (!str) return '';\n  return str.replace(/'/g, \"''\");\n}\n\nconst ollamaResponse = $input.first().json;\nconst preparedData = $('Prepare').first().json;\n\nconst content = ollamaResponse.message?.content || 'Generation failed - no content returned';\n\nreturn [{\n  json: {\n    topic_id: preparedData.topic_id,\n    title: escapeSql(preparedData.topic),\n    platform: escapeSql(preparedData.platform),\n    pillar: escapeSql(preparedData.pillar),\n    content_type: escapeSql('thought_leadership'),\n    generated_content: escapeSql(content),\n    status: escapeSql('pending_review')\n  }\n}];"
       },
       "id": "parse-response",
       "name": "Parse Response",
@@ -133,7 +133,7 @@
       "parameters": {
         "operation": "sendMessage",
         "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
-        "text": "=📦 *Batch Generation Complete*\n\n✅ Generated posts from topic queue\n📋 Status: Pending Review\n\n_Review at:_ http://localhost:5678",
+        "text": "=\ud83d\udce6 *Batch Generation Complete*\n\n\u2705 Generated posts from topic queue\n\ud83d\udccb Platforms: LinkedIn, Facebook Tech, Facebook Chinese\n\u23f3 Status: Pending Review\n\n_Review at:_ http://localhost:5678\n_Or use:_ /pending",
         "additionalFields": {"parse_mode": "Markdown"}
       },
       "id": "summary",
@@ -164,5 +164,5 @@
     "Wait 30s": {"main": [[{"node": "Loop Topics", "type": "main", "index": 0}]]}
   },
   "settings": {"executionOrder": "v1"},
-  "tags": [{"name": "content"}, {"name": "batch"}]
+  "tags": [{"name": "content"}, {"name": "batch"}, {"name": "multi-platform"}]
 }
