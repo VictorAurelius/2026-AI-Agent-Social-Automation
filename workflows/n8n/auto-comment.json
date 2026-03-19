@@ -1,0 +1,161 @@
+{
+  "name": "WF12: Auto-Comment Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 30}]
+        }
+      },
+      "id": "cron",
+      "name": "Every 30 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title, platform, post_url, quiz_answer FROM content_queue WHERE content_format = 'quiz' AND status = 'published' AND comment_posted = false AND comment_scheduled_at <= NOW() LIMIT 5"
+      },
+      "id": "get-due",
+      "name": "Get Due Comments",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [440, 300],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {"leftValue": "={{ $json.id }}", "rightValue": "", "operator": {"type": "string", "operation": "isNotEmpty"}}
+          ]
+        }
+      },
+      "id": "has-items",
+      "name": "Has Items?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "loop",
+      "name": "Loop Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [840, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const item = $('Loop Items').first().json;\nlet quizAnswer;\ntry {\n  quizAnswer = typeof item.quiz_answer === 'string' ? JSON.parse(item.quiz_answer) : item.quiz_answer;\n} catch(e) {\n  quizAnswer = { formatted_comment: 'Error parsing answer data' };\n}\n\nconst comment = quizAnswer.formatted_comment || \n  '✅ Đáp án: ' + (quizAnswer.correct_answer || '?') + '\\n\\n' + (quizAnswer.explanation || '');\n\nreturn [{\n  json: {\n    content_id: item.id,\n    title: item.title,\n    platform: item.platform,\n    post_url: item.post_url,\n    comment_text: comment,\n    is_facebook: item.platform && item.platform.startsWith('facebook')\n  }\n}];"
+      },
+      "id": "format-comment",
+      "name": "Format Comment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {"leftValue": "={{ $json.is_facebook }}", "rightValue": true, "operator": {"type": "boolean", "operation": "equals"}}
+          ]
+        }
+      },
+      "id": "is-facebook",
+      "name": "Is Facebook?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1240, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/{{ $json.post_url.split('_').pop() || $json.post_url }}/comments",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"message\": $json.comment_text, \"access_token\": $env.FACEBOOK_PAGE_TOKEN } }}",
+        "options": {"timeout": 30000}
+      },
+      "id": "post-fb-comment",
+      "name": "Post FB Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 180]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=📋 *LinkedIn Quiz Answer - #{{ $json.content_id }}*\n\n*Title:* {{ $json.title }}\n\n---\n\n{{ $json.comment_text }}\n\n---\n\n📌 Copy đáp án trên và comment vào bài LinkedIn:\n{{ $json.post_url || 'URL chưa có' }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "send-li-answer",
+      "name": "Send LI Answer via Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1440, 340],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE content_queue SET comment_posted = true WHERE id = {{ $('Format Comment').first().json.content_id }}"
+      },
+      "id": "mark-done",
+      "name": "Mark Comment Done",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1640, 240],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=✅ *Auto-comment đáp án posted*\n\n#{{ $('Format Comment').first().json.content_id }} - {{ $('Format Comment').first().json.title }}\nPlatform: {{ $('Format Comment').first().json.platform }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "notify-done",
+      "name": "Notify Done",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1840, 240],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    }
+  ],
+  "connections": {
+    "Every 30 Min": {"main": [[{"node": "Get Due Comments", "type": "main", "index": 0}]]},
+    "Get Due Comments": {"main": [[{"node": "Has Items?", "type": "main", "index": 0}]]},
+    "Has Items?": {
+      "main": [
+        [{"node": "Loop Items", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Loop Items": {
+      "main": [
+        [{"node": "Format Comment", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Format Comment": {"main": [[{"node": "Is Facebook?", "type": "main", "index": 0}]]},
+    "Is Facebook?": {
+      "main": [
+        [{"node": "Post FB Comment", "type": "main", "index": 0}],
+        [{"node": "Send LI Answer via Telegram", "type": "main", "index": 0}]
+      ]
+    },
+    "Post FB Comment": {"main": [[{"node": "Mark Comment Done", "type": "main", "index": 0}]]},
+    "Send LI Answer via Telegram": {"main": [[{"node": "Mark Comment Done", "type": "main", "index": 0}]]},
+    "Mark Comment Done": {"main": [[{"node": "Notify Done", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": [{"name": "quiz"}, {"name": "auto-comment"}, {"name": "scheduler"}]
+}
