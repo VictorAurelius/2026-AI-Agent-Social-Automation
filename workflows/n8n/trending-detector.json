@@ -1,0 +1,338 @@
+{
+  "name": "WF14: Trending Detector",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "cron-daily-7am",
+      "name": "Cron Daily 7AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://hacker-news.firebaseio.com/v0/topstories.json",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "fetch-hn-top-ids",
+      "name": "Fetch HN Top IDs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 140]
+    },
+    {
+      "parameters": {
+        "url": "=https://hacker-news.firebaseio.com/v0/item/{{ $json[0] }}.json",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "batching": {
+            "batch": {
+              "batchSize": 30
+            }
+          }
+        }
+      },
+      "id": "fetch-hn-stories",
+      "name": "Fetch HN Stories",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 140],
+      "notes": "Fetch top 30 story details for title extraction"
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/programming/hot.json?limit=30",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "n8n-trending-detector/1.0"
+            }
+          ]
+        }
+      },
+      "id": "fetch-reddit",
+      "name": "Fetch Reddit r/programming",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/search/repositories?q=created:>={{ $now.minus(1, 'day').toFormat('yyyy-MM-dd') }}&sort=stars&order=desc&per_page=30",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "fetch-github-trending",
+      "name": "Fetch GitHub Trending",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 460]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Extract titles from all sources\nconst hnItems = $('Fetch HN Stories').all();\nconst redditData = $('Fetch Reddit r/programming').first().json;\nconst githubData = $('Fetch GitHub Trending').first().json;\n\n// HN titles\nconst hnTitles = hnItems.map(item => item.json.title || '').filter(Boolean);\n\n// Reddit titles\nconst redditTitles = (redditData?.data?.children || []).map(c => c.data?.title || '').filter(Boolean);\n\n// GitHub repo names + descriptions\nconst githubTitles = (githubData?.items || []).map(r => `${r.name} ${r.description || ''}`).filter(Boolean);\n\n// Keyword extraction\nconst techPattern = /\\b(ai|llm|gpt|claude|docker|kubernetes|k8s|rust|python|react|vue|nextjs|typescript|golang|postgres|redis|aws|azure|gcp|devops|cicd|microservices|serverless|blockchain|web3|api|graphql|grpc|wasm|langchain|rag|vector|embedding|agent|copilot|gemini|ollama|llama|mistral|openai|supabase|drizzle|htmx|bun|deno|svelte|tailwind)\\b/gi;\n\nfunction extractKeywords(titles) {\n  const matches = titles.join(' ').match(techPattern) || [];\n  const freq = {};\n  matches.forEach(t => {\n    const key = t.toLowerCase();\n    freq[key] = (freq[key] || 0) + 1;\n  });\n  return freq;\n}\n\nconst sourceKeywords = {\n  hackernews: extractKeywords(hnTitles),\n  reddit: extractKeywords(redditTitles),\n  github: extractKeywords(githubTitles)\n};\n\nreturn [{\n  json: {\n    sourceKeywords,\n    hnTitles: hnTitles.slice(0, 5),\n    redditTitles: redditTitles.slice(0, 5),\n    githubTitles: githubTitles.slice(0, 5)\n  }\n}];"
+      },
+      "id": "extract-keywords",
+      "name": "Extract Keywords",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Cross-reference: find keywords appearing in 2+ sources\nconst { sourceKeywords, hnTitles, redditTitles, githubTitles } = $input.first().json;\n\n// Collect all unique keywords\nconst allKeywords = new Set();\nObject.values(sourceKeywords).forEach(freq => {\n  Object.keys(freq).forEach(kw => allKeywords.add(kw));\n});\n\n// Find trending (in 2+ sources)\nconst trending = [];\nfor (const kw of allKeywords) {\n  const sources = Object.keys(sourceKeywords).filter(src =>\n    sourceKeywords[src][kw] && sourceKeywords[src][kw] > 0\n  );\n  if (sources.length >= 2) {\n    // Collect sample titles mentioning this keyword\n    const allTitles = [...hnTitles, ...redditTitles, ...githubTitles];\n    const samples = allTitles\n      .filter(t => t.toLowerCase().includes(kw))\n      .slice(0, 3);\n    trending.push({\n      keyword: kw,\n      sources,\n      source_count: sources.length,\n      sample_titles: samples\n    });\n  }\n}\n\n// Sort by source_count desc\ntrending.sort((a, b) => b.source_count - a.source_count);\n\nreturn trending.map(t => ({ json: t }));"
+      },
+      "id": "cross-reference",
+      "name": "Cross-Reference Sources",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1160, 300]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT keyword FROM trending_log WHERE keyword = '{{ $json.keyword }}' AND detected_at > NOW() - INTERVAL '7 days' UNION SELECT topic FROM topic_ideas WHERE topic ILIKE '%{{ $json.keyword }}%' AND status != 'rejected'",
+        "additionalFields": {}
+      },
+      "id": "check-existing",
+      "name": "Check Existing Topics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1380, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-not-exists",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-new-only",
+      "name": "Filter New Only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1600, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO trending_log (keyword, sources, source_count, sample_titles) VALUES ('{{ $('Cross-Reference Sources').item.json.keyword }}', ARRAY[{{ $('Cross-Reference Sources').item.json.sources.map(s => \"'\" + s + \"'\").join(',') }}], {{ $('Cross-Reference Sources').item.json.source_count }}, ARRAY[{{ $('Cross-Reference Sources').item.json.sample_titles.map(s => \"'\" + s.replace(/'/g, \"''\") + \"'\").join(',') }}])",
+        "additionalFields": {}
+      },
+      "id": "log-trending",
+      "name": "Log Trending",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1820, 200],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO topic_ideas (topic, priority, notes, status) VALUES ('{{ $('Cross-Reference Sources').item.json.keyword }}', 1, 'trending - detected in {{ $('Cross-Reference Sources').item.json.sources.join(\", \") }}', 'pending')",
+        "additionalFields": {}
+      },
+      "id": "add-to-queue",
+      "name": "Add to Topic Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1820, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst count = items.length;\nif (count === 0) {\n  return [{ json: { message: 'No new trending topics detected today.' } }];\n}\nconst keywords = items.map(i => i.json.keyword || i.json.topic || 'unknown');\nconst message = `🔥 ${count} trending topic${count > 1 ? 's' : ''} detected:\\n${keywords.map(k => `• ${k}`).join('\\n')}`;\nreturn [{ json: { message } }];"
+      },
+      "id": "format-message",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2040, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-notify",
+      "name": "Telegram Notify",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2260, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Daily 7AM": {
+      "main": [
+        [
+          { "node": "Fetch HN Top IDs", "type": "main", "index": 0 },
+          { "node": "Fetch Reddit r/programming", "type": "main", "index": 0 },
+          { "node": "Fetch GitHub Trending", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch HN Top IDs": {
+      "main": [
+        [
+          { "node": "Fetch HN Stories", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch HN Stories": {
+      "main": [
+        [
+          { "node": "Extract Keywords", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch Reddit r/programming": {
+      "main": [
+        [
+          { "node": "Extract Keywords", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch GitHub Trending": {
+      "main": [
+        [
+          { "node": "Extract Keywords", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Extract Keywords": {
+      "main": [
+        [
+          { "node": "Cross-Reference Sources", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Cross-Reference Sources": {
+      "main": [
+        [
+          { "node": "Check Existing Topics", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Check Existing Topics": {
+      "main": [
+        [
+          { "node": "Filter New Only", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Filter New Only": {
+      "main": [
+        [
+          { "node": "Log Trending", "type": "main", "index": 0 },
+          { "node": "Add to Topic Queue", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Log Trending": {
+      "main": [
+        [
+          { "node": "Format Telegram Message", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Add to Topic Queue": {
+      "main": [
+        [
+          { "node": "Format Telegram Message", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          { "node": "Telegram Notify", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {
+      "name": "trending",
+      "id": "14"
+    }
+  ]
+}
