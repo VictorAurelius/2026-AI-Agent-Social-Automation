@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    background: #FFFFFF;
+    font-family: 'Noto Sans', 'Segoe UI', Arial, sans-serif;
+    padding: 40px;
+  }
+  .header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 40px;
+  }
+  .header::before {
+    content: ''; width: 5px; height: 40px;
+    background: #2563EB; border-radius: 3px;
+  }
+  .header h1 { font-size: 38px; color: #1E293B; }
+  .brand { font-size: 14px; color: #94A3B8; margin-left: auto; }
+  .flow {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .step {
+    display: flex; align-items: stretch; gap: 16px;
+  }
+  .step-number {
+    width: 48px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .step-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #2563EB; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+  }
+  .step-line {
+    width: 2px; flex: 1; background: #CBD5E1;
+    margin-top: 4px;
+  }
+  .step-content {
+    flex: 1; padding: 16px 24px;
+    background: #F8FAFC; border-radius: 12px;
+    border-left: 3px solid #2563EB;
+    margin-bottom: 8px;
+  }
+  .step-content h3 {
+    font-size: 20px; color: #1E293B; margin-bottom: 8px;
+  }
+  .step-content p {
+    font-size: 16px; color: #64748B; line-height: 1.5;
+  }
+  .step:last-child .step-line { display: none; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{TITLE}}</h1>
+    <span class="brand">@VictorAurelius</span>
+  </div>
+  <div class="flow">
+    {{STEPS}}
+    <!-- Step template (injected per step):
+    <div class="step">
+      <div class="step-number">
+        <div class="step-circle">{{NUMBER}}</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-content">
+        <h3>{{STEP_TITLE}}</h3>
+        <p>{{STEP_DESCRIPTION}}</p>
+      </div>
+    </div>
+    -->
+  </div>
+</body>
+</html>

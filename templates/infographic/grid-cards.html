@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    background: #F0FDF4;
+    font-family: 'Noto Sans', 'Segoe UI', Arial, sans-serif;
+    padding: 40px;
+  }
+  .header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 40px; color: #1E293B; font-weight: 800;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .header h1::before {
+    content: ''; display: block;
+    width: 5px; height: 40px;
+    background: #10B981; border-radius: 3px;
+  }
+  .brand {
+    font-size: 16px; color: #64748B;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid #E2E8F0;
+    transition: transform 0.2s;
+  }
+  .card-header {
+    display: flex; align-items: center;
+    justify-content: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .card-number {
+    background: #1E293B; color: white;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800;
+  }
+  .card-name {
+    background: #10B981; color: white;
+    padding: 4px 16px; border-radius: 20px;
+    font-size: 14px; font-weight: 700;
+  }
+  .card-icon {
+    font-size: 48px; margin: 16px 0;
+    display: block; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-desc {
+    font-size: 13px; color: #64748B;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{TITLE}}</h1>
+    <span class="brand">@VictorAurelius</span>
+  </div>
+  <div class="grid">
+    {{CARDS}}
+    <!-- Card template (injected per item):
+    <div class="card">
+      <div class="card-header">
+        <span class="card-number">{{NUMBER}}</span>
+        <span class="card-name">{{NAME}}</span>
+      </div>
+      <span class="card-icon">{{ICON}}</span>
+      <p class="card-desc">{{DESCRIPTION}}</p>
+    </div>
+    -->
+  </div>
+</body>
+</html>

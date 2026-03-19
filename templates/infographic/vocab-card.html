@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px;
+    background: linear-gradient(180deg, #FEF3C7 0%, #FFFBEB 100%);
+    font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
+    padding: 60px;
+    display: flex; flex-direction: column;
+  }
+  .header { margin-bottom: 30px; }
+  .header h2 {
+    font-size: 24px; color: #92400E;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chinese-char {
+    font-size: 120px; color: #B45309;
+    text-align: center; font-weight: 800;
+    margin: 20px 0;
+  }
+  .pinyin {
+    text-align: center; font-size: 32px;
+    color: #D97706; margin-bottom: 10px;
+  }
+  .meaning {
+    text-align: center; font-size: 28px;
+    color: #78350F; margin-bottom: 40px;
+  }
+  .examples {
+    background: white; border-radius: 16px;
+    padding: 24px; flex: 1;
+  }
+  .examples h3 {
+    font-size: 20px; color: #92400E;
+    margin-bottom: 16px;
+  }
+  .example {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #FDE68A;
+  }
+  .example:last-child { border-bottom: none; }
+  .example .cn {
+    font-size: 24px; color: #1E293B; margin-bottom: 4px;
+  }
+  .example .py {
+    font-size: 16px; color: #D97706; margin-bottom: 4px;
+  }
+  .example .vi {
+    font-size: 16px; color: #64748B;
+  }
+  .tip {
+    margin-top: auto;
+    padding: 16px;
+    background: #FEF9C3;
+    border-radius: 12px;
+    font-size: 16px; color: #92400E;
+  }
+  .footer {
+    text-align: center; margin-top: 20px;
+    font-size: 14px; color: #B45309;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h2>Tu vung HSK {{LEVEL}}</h2>
+  </div>
+  <div class="chinese-char">{{HANTU}}</div>
+  <p class="pinyin">{{PINYIN}}</p>
+  <p class="meaning">{{MEANING}}</p>
+  <div class="examples">
+    <h3>Vi du:</h3>
+    {{EXAMPLES}}
+    <!-- Example template (injected per example):
+    <div class="example">
+      <p class="cn">{{CHINESE}}</p>
+      <p class="py">{{PINYIN}}</p>
+      <p class="vi">{{VIETNAMESE}}</p>
+    </div>
+    -->
+  </div>
+  <div class="tip">Meo nho: {{TIP}}</div>
+  <p class="footer">@VictorAurelius | Hoc tieng Trung moi ngay</p>
+</body>
+</html>

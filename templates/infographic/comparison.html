@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    background: #F8FAFC;
+    font-family: 'Noto Sans', 'Segoe UI', Arial, sans-serif;
+    padding: 40px;
+  }
+  .header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 30px;
+  }
+  .header::before {
+    content: ''; width: 5px; height: 40px;
+    background: #2563EB; border-radius: 3px;
+  }
+  .header h1 { font-size: 38px; color: #1E293B; }
+  .brand { font-size: 14px; color: #94A3B8; margin-left: auto; }
+  table {
+    width: 100%; border-collapse: separate;
+    border-spacing: 0; border-radius: 16px;
+    overflow: hidden; background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  th {
+    background: #1E293B; color: white;
+    padding: 20px 24px; font-size: 20px;
+    text-align: center;
+  }
+  th:first-child { text-align: left; background: #334155; }
+  td {
+    padding: 16px 24px; font-size: 18px;
+    border-bottom: 1px solid #F1F5F9;
+    text-align: center; color: #475569;
+  }
+  td:first-child {
+    text-align: left; font-weight: 600; color: #1E293B;
+  }
+  tr:last-child td { border-bottom: none; }
+  .verdict {
+    margin-top: 24px; padding: 20px 24px;
+    background: #EFF6FF; border-radius: 12px;
+    border-left: 4px solid #2563EB;
+    font-size: 18px; color: #1E293B;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{TITLE}}</h1>
+    <span class="brand">@VictorAurelius</span>
+  </div>
+  <table>
+    {{TABLE_CONTENT}}
+  </table>
+  <div class="verdict">
+    <strong>Verdict:</strong> {{VERDICT}}
+  </div>
+</body>
+</html>
