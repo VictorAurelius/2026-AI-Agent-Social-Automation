@@ -1,6 +1,8 @@
 version: '3.8'
 
 # AI Agent Social Automation - Docker Compose
+# Compatible with: x86_64 (local) and arm64/aarch64 (Oracle Cloud)
+# For Oracle Cloud: change Ollama model to qwen2:14b for better quality
 # Usage: docker-compose up -d
 
 services:
