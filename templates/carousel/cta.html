@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 80px;
+    font-family: 'Noto Sans', 'Segoe UI', sans-serif;
+    color: white;
+  }
+  h2 {
+    font-size: 52px; text-align: center;
+    font-weight: 800; margin-bottom: 20px;
+  }
+  .actions {
+    font-size: 32px; margin-top: 20px;
+    display: flex; gap: 24px;
+  }
+  .follow-btn {
+    margin-top: 60px;
+    padding: 24px 56px;
+    border: 3px solid white;
+    border-radius: 16px;
+    font-size: 28px; font-weight: 700;
+  }
+  .hashtags {
+    margin-top: 40px;
+    font-size: 22px; color: #93C5FD;
+    text-align: center;
+  }
+  .summary {
+    margin-top: 50px;
+    font-size: 20px; color: #BFDBFE;
+    text-align: center; line-height: 1.6;
+    max-width: 800px;
+  }
+</style>
+</head>
+<body>
+  <h2>Thay huu ich?</h2>
+  <div class="actions">
+    <span>Like</span>
+    <span>Save</span>
+    <span>Share</span>
+  </div>
+  <div class="follow-btn">Follow {{CTA}}</div>
+  <p class="hashtags">{{HASHTAGS}}</p>
+  <p class="summary">{{SUMMARY}}</p>
+</body>
+</html>
