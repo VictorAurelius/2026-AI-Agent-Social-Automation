@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="628" viewBox="0 0 1200 628">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E293B"/>
+      <stop offset="100%" style="stop-color:#0F172A"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="628" fill="url(#bg)"/>
+  <!-- Accent line -->
+  <rect x="60" y="60" width="4" height="120" fill="#2563EB" rx="2"/>
+  <!-- Title area -->
+  <text x="84" y="110" font-family="Noto Sans, sans-serif" font-weight="bold" font-size="42" fill="#FFFFFF">{{TITLE_LINE_1}}</text>
+  <text x="84" y="165" font-family="Noto Sans, sans-serif" font-weight="bold" font-size="42" fill="#FFFFFF">{{TITLE_LINE_2}}</text>
+  <!-- Body area -->
+  <text x="84" y="260" font-family="Noto Sans, sans-serif" font-size="24" fill="#94A3B8">{{BODY_TEXT}}</text>
+  <!-- Bottom bar -->
+  <rect x="0" y="568" width="1200" height="60" fill="#2563EB" opacity="0.9"/>
+  <text x="60" y="605" font-family="Noto Sans, sans-serif" font-size="20" fill="#FFFFFF">{{AUTHOR}} | {{HASHTAGS}}</text>
+  <!-- Logo area -->
+  <circle cx="1120" cy="598" r="20" fill="#FFFFFF" opacity="0.2"/>
+</svg>
