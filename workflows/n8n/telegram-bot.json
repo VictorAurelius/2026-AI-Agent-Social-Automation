@@ -1,0 +1,308 @@
+{
+  "name": "WF6: Telegram Bot Interactive",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "telegram-bot-webhook",
+      "credentials": {
+        "telegramApi": {"id": "1", "name": "Telegram Bot"}
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const message = $input.first().json;\nconst text = message.message?.text || '';\nconst chatId = message.message?.chat?.id || '';\n\nconst parts = text.trim().split(/\\s+/);\nconst command = (parts[0] || '').toLowerCase().replace('/', '');\nconst args = parts.slice(1).join(' ');\n\n// Parse command with ID (e.g., /approve 15, /view 15)\nconst idMatch = args.match(/^(\\d+)/);\nconst contentId = idMatch ? parseInt(idMatch[1]) : null;\nconst extraArgs = idMatch ? args.replace(/^\\d+\\s*/, '') : args;\n\nreturn [{\n  json: {\n    command,\n    args,\n    contentId,\n    extraArgs,\n    chatId: String(chatId),\n    rawMessage: text\n  }\n}];"
+      },
+      "id": "extract-command",
+      "name": "Extract Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {"outputKey": "help", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "help", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "status", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "status", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "pending", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "pending", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "view", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "view", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "approve", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "approve", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "reject", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "reject", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "generate", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "generate", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "topics", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "topics", "operator": {"type": "string", "operation": "equals"}}]}},
+            {"outputKey": "health", "conditions": {"conditions": [{"leftValue": "={{ $json.command }}", "rightValue": "health", "operator": {"type": "string", "operation": "equals"}}]}}
+          ],
+          "fallbackOutput": "help"
+        }
+      },
+      "id": "router",
+      "name": "Command Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "=🤖 *AI Agent Bot - Trợ giúp*\n\n📝 *Tạo nội dung:*\n/generate <chủ đề> - Tạo bài LinkedIn\n/batch - Chạy batch generate\n\n📋 *Quản lý nội dung:*\n/status - Thống kê content queue\n/pending - Bài chờ review\n/view <id> - Xem nội dung đầy đủ\n/approve <id> - Duyệt bài\n/reject <id> <lý do> - Từ chối bài\n\n📌 *Topics:*\n/topics - Xem topics chưa dùng\n\n🔧 *Hệ thống:*\n/health - Kiểm tra services\n/help - Hiển thị trợ giúp này",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-help",
+      "name": "Reply Help",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [920, 200],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT status, COUNT(*) as count FROM content_queue GROUP BY status ORDER BY status"
+      },
+      "id": "query-status",
+      "name": "Query Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [920, 340],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const stats = $input.all().map(i => i.json);\nconst counts = {};\nstats.forEach(s => { counts[s.status] = parseInt(s.count); });\n\nlet msg = '📊 *Content Queue Status*\\n\\n';\nmsg += `• Draft: ${counts.draft || 0}\\n`;\nmsg += `• ⏳ Pending Review: ${counts.pending_review || 0}\\n`;\nmsg += `• ✅ Approved: ${counts.approved || 0}\\n`;\nmsg += `• 📅 Scheduled: ${counts.scheduled || 0}\\n`;\nmsg += `• 🚀 Published: ${counts.published || 0}\\n`;\nmsg += `• ❌ Rejected: ${counts.rejected || 0}\\n`;\n\nconst total = Object.values(counts).reduce((a, b) => a + b, 0);\nmsg += `\\n📈 Total: ${total} bài`;\nmsg += `\\n\\nDùng /pending để xem chi tiết bài chờ review.`;\n\nreturn [{ json: { message: msg } }];"
+      },
+      "id": "format-status",
+      "name": "Format Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 340]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-status",
+      "name": "Reply Status",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 340],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title, pillar, created_at::date as created FROM content_queue WHERE status = 'pending_review' ORDER BY created_at DESC LIMIT 10"
+      },
+      "id": "query-pending",
+      "name": "Query Pending",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [920, 480],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all().map(i => i.json);\n\nlet msg = '📝 *Bài chờ Review*\\n\\n';\n\nif (items.length === 0) {\n  msg += '✅ Không có bài nào chờ review!';\n} else {\n  items.forEach((item, i) => {\n    msg += `${i+1}. *#${item.id}* ${item.title}\\n`;\n    msg += `   📌 ${item.pillar} | 📅 ${item.created}\\n\\n`;\n  });\n  msg += `Dùng /view <id> để xem nội dung đầy đủ.`;\n}\n\nreturn [{ json: { message: msg } }];"
+      },
+      "id": "format-pending",
+      "name": "Format Pending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-pending",
+      "name": "Reply Pending",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 480],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title, pillar, platform, status, generated_content, created_at::date as created FROM content_queue WHERE id = {{ $('Extract Command').first().json.contentId }}"
+      },
+      "id": "query-view",
+      "name": "Query View",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [920, 620],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const item = $input.first().json;\nlet msg;\n\nif (!item || !item.id) {\n  msg = '❌ Không tìm thấy bài viết. Dùng: /view <id>';\n} else {\n  msg = `📄 *Content #${item.id}*\\n\\n`;\n  msg += `*Title:* ${item.title}\\n`;\n  msg += `*Platform:* ${item.platform}\\n`;\n  msg += `*Pillar:* ${item.pillar}\\n`;\n  msg += `*Status:* ${item.status}\\n`;\n  msg += `*Created:* ${item.created}\\n\\n`;\n  msg += `---\\n\\n`;\n  \n  // Telegram has 4096 char limit\n  const content = item.generated_content || 'Không có nội dung';\n  if (content.length > 3000) {\n    msg += content.substring(0, 3000) + '\\n\\n_(Nội dung bị cắt do giới hạn Telegram)_';\n  } else {\n    msg += content;\n  }\n  \n  msg += `\\n\\n---\\n`;\n  if (item.status === 'pending_review') {\n    msg += `✅ /approve ${item.id} | ❌ /reject ${item.id} <lý do>`;\n  }\n}\n\nreturn [{ json: { message: msg } }];"
+      },
+      "id": "format-view",
+      "name": "Format View",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 620]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-view",
+      "name": "Reply View",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 620],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE content_queue SET status = 'approved', final_content = generated_content WHERE id = {{ $('Extract Command').first().json.contentId }} AND status = 'pending_review' RETURNING id, title"
+      },
+      "id": "do-approve",
+      "name": "Do Approve",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [920, 760],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "=✅ *Đã duyệt!*\n\n#{{ $json.id }} - {{ $json.title }}\n\nStatus: approved",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-approve",
+      "name": "Reply Approve",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1120, 760],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "function escapeSql(str) { return str ? str.replace(/'/g, \"''\") : ''; }\nconst cmd = $('Extract Command').first().json;\nconst reason = escapeSql(cmd.extraArgs || 'No reason provided');\nconst id = cmd.contentId;\n\nreturn [{ json: { id, reason, query: `UPDATE content_queue SET status = 'rejected', rejection_reason = '${reason}' WHERE id = ${id} AND status = 'pending_review' RETURNING id, title` } }];"
+      },
+      "id": "prepare-reject",
+      "name": "Prepare Reject",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 900]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.query }}"
+      },
+      "id": "do-reject",
+      "name": "Do Reject",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1120, 900],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "=❌ *Đã từ chối!*\n\n#{{ $json.id }} - {{ $json.title }}\n\nLý do: {{ $('Extract Command').first().json.extraArgs || 'Không có' }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-reject",
+      "name": "Reply Reject",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 900],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, topic, pillar, priority FROM topic_ideas WHERE used = false ORDER BY priority ASC LIMIT 10"
+      },
+      "id": "query-topics",
+      "name": "Query Topics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [920, 1040],
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all().map(i => i.json);\nlet msg = '📌 *Topics chưa dùng*\\n\\n';\n\nif (items.length === 0) {\n  msg += '⚠️ Không còn topic nào! Thêm mới bằng /addtopic';\n} else {\n  items.forEach((item, i) => {\n    msg += `${i+1}. *[P${item.priority}]* ${item.topic}\\n`;\n    msg += `   📌 ${item.pillar}\\n\\n`;\n  });\n  msg += `Còn ${items.length} topics.`;\n}\n\nreturn [{ json: { message: msg } }];"
+      },
+      "id": "format-topics",
+      "name": "Format Topics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 1040]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Extract Command').first().json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "reply-topics",
+      "name": "Reply Topics",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1320, 1040],
+      "credentials": {"telegramApi": {"id": "1", "name": "Telegram Bot"}}
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {"main": [[{"node": "Extract Command", "type": "main", "index": 0}]]},
+    "Extract Command": {"main": [[{"node": "Command Router", "type": "main", "index": 0}]]},
+    "Command Router": {
+      "main": [
+        [{"node": "Reply Help", "type": "main", "index": 0}],
+        [{"node": "Query Status", "type": "main", "index": 0}],
+        [{"node": "Query Pending", "type": "main", "index": 0}],
+        [{"node": "Query View", "type": "main", "index": 0}],
+        [{"node": "Do Approve", "type": "main", "index": 0}],
+        [{"node": "Prepare Reject", "type": "main", "index": 0}],
+        [{"node": "Reply Help", "type": "main", "index": 0}],
+        [{"node": "Query Topics", "type": "main", "index": 0}],
+        [{"node": "Reply Help", "type": "main", "index": 0}]
+      ]
+    },
+    "Query Status": {"main": [[{"node": "Format Status", "type": "main", "index": 0}]]},
+    "Format Status": {"main": [[{"node": "Reply Status", "type": "main", "index": 0}]]},
+    "Query Pending": {"main": [[{"node": "Format Pending", "type": "main", "index": 0}]]},
+    "Format Pending": {"main": [[{"node": "Reply Pending", "type": "main", "index": 0}]]},
+    "Query View": {"main": [[{"node": "Format View", "type": "main", "index": 0}]]},
+    "Format View": {"main": [[{"node": "Reply View", "type": "main", "index": 0}]]},
+    "Do Approve": {"main": [[{"node": "Reply Approve", "type": "main", "index": 0}]]},
+    "Prepare Reject": {"main": [[{"node": "Do Reject", "type": "main", "index": 0}]]},
+    "Do Reject": {"main": [[{"node": "Reply Reject", "type": "main", "index": 0}]]},
+    "Query Topics": {"main": [[{"node": "Format Topics", "type": "main", "index": 0}]]},
+    "Format Topics": {"main": [[{"node": "Reply Topics", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": [{"name": "telegram"}, {"name": "bot"}, {"name": "interactive"}]
+}
