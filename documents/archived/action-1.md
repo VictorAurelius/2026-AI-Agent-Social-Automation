@@ -46,3 +46,15 @@ commit và tuân thủ quy trình fix của superpowers
 tôi chưa hài lòng với quy trình fix này, mỗi lần fix hoặc feature phải tạo branch, fix, tạo pull request, cập nhật lại skill
 
 fix theo đúng chuẩn của superpowers
+
+tài liệu mô tả về 4 PR lần này
+
+check 2 bài đăng này:
+https://www.linkedin.com/posts/alexxubyte_systemdesign-coding-interviewtips-share-7439698363677290496-Ozmp?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFPi1C4B8CnR5jCDqYbZwOBy2qIBEvQEIiY
+https://www.linkedin.com/posts/sivasankar-natarajan_agenticai-aiprotocols-genai-share-7439343782329876480-Tw1y?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFPi1C4B8CnR5jCDqYbZwOBy2qIBEvQEIiY
+
+hình ảnh họ dùng là định dạng gì, sao lại có chuyển động hay vậy, hệ thống có thể tạo ra được không?
+
+có vẻ nó là dạng gif
+
+tạo 2 PR PDE và Image luôn theo chuẩn superpower
