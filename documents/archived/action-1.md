@@ -58,3 +58,16 @@ hình ảnh họ dùng là định dạng gì, sao lại có chuyển động ha
 có vẻ nó là dạng gif
 
 tạo 2 PR PDE và Image luôn theo chuẩn superpower
+
+bạn nghĩ sao về việc đưa lên production chạy bằng free-tier sẽ có thể sử dùng ollama nhiều tham số hơn:
+✅ Thông tin CHÍNH XÁC
+ARM Compute: 4 CPU + 24GB RAM
+Oracle cung cấp ARM-based VM (Ampere A FreeTiers1) với tối đa 4 OCPU và 24GB RAM miễn phí vĩnh viễn, kèm 200GB block storage.
+x86 Compute: 2 VMs x (1/8 CPU + 1GB)
+Hai AMD-based Compute VM, mỗi cái có 1/8 OCPU và 1 GB memory, phù hợp cho app nhỏ hoặc dev environment. Topuser
+Load Balancer: 1 LB (10 Mbps)
+Tất cả tenancy được tạo từ 15/12/2020 trở đi sẽ có 1 Always Free Flexible Load Balancer với bandwidth tối thiểu và tối đa là 10 Mbps. Oracle
+Outbound: 10 TB/tháng và Vĩnh viễn
+Tính đến 2026, Oracle Cloud Always Free Tier vẫn hoạt động bình thường với các tài nguyên chủ chốt không thay đổi, bao gồm Ampere A1 (4 OCPU, 24GB RAM), 200GB block storage. Grokipedia
+Idle reclamation: CPU <20%
+Oracle xác định VM là idle nếu trong 7 ngày, CPU utilization ở percentile thứ 95 dưới 20% — đây là chính sách chính thức từ Oracle docs. Oracle ✅ Document ghi đúng.
