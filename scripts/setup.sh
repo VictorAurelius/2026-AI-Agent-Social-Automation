@@ -1,5 +1,5 @@
 #!/bin/bash
-# AI Agent Social Automation - Setup Script
+# AI Agent Agent Personal - Setup Script
 # Usage: ./scripts/setup.sh
 # This script sets up the complete Docker environment
 
@@ -11,7 +11,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 DOCKER_DIR="$PROJECT_DIR/docker"
 
 echo "========================================"
-echo "  AI Agent Social Automation Setup"
+echo "  AI Agent Agent Personal Setup"
 echo "========================================"
 echo ""
 
@@ -67,7 +67,7 @@ if [ ! -f .env ]; then
         cp .env.example .env
         echo -e "${YELLOW}Created .env file from .env.example${NC}"
         echo ""
-        echo -e "${YELLOW}⚠️  IMPORTANT: Please edit docker/.env with your passwords!${NC}"
+        echo -e "${YELLOW}⚠️  IMPORTANT: Please edit infrastructure/docker/.env with your passwords!${NC}"
         echo ""
         echo "Required changes:"
         echo "  - POSTGRES_PASSWORD"
@@ -170,8 +170,8 @@ echo ""
 
 # Test PostgreSQL
 echo -n "PostgreSQL: "
-if docker exec postgres pg_isready -U postgres -d social_automation &>/dev/null; then
-    TABLES=$(docker exec postgres psql -U postgres -d social_automation -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null | tr -d ' ')
+if docker exec postgres pg_isready -U postgres -d agent_personal &>/dev/null; then
+    TABLES=$(docker exec postgres psql -U postgres -d agent_personal -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null | tr -d ' ')
     echo -e "${GREEN}✓ Running ($TABLES tables)${NC}"
 else
     echo -e "${RED}✗ Not ready${NC}"
@@ -217,7 +217,7 @@ echo "Next steps:"
 echo "  1. Open http://localhost:5678"
 echo "  2. Login with credentials from .env"
 echo "  3. Add PostgreSQL credentials in n8n"
-echo "  4. Import workflows from workflows/n8n/"
+echo "  4. Import workflows from modules/social/workflows/"
 echo ""
 echo "Useful commands:"
 echo "  ./scripts/healthcheck.sh  - Check service health"

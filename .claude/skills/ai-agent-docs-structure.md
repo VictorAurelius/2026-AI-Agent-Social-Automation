@@ -4,7 +4,7 @@
 
 ## Overview
 
-Quy tắc tổ chức files documentation, reports, scripts cho AI Agent Social Automation project để tránh làm loãng folder gốc.
+Quy tắc tổ chức files documentation, reports, scripts cho AI Agent Personal project để tránh làm loãng folder gốc.
 
 ## Trigger Phrases
 
@@ -19,7 +19,7 @@ Quy tắc tổ chức files documentation, reports, scripts cho AI Agent Social 
 
 ## 📁 Standard Folder Structure
 
-### For AI Agent Social Automation Project
+### For AI Agent Personal Project
 
 ```
 ai-agent-social-automation/
@@ -308,7 +308,7 @@ chmod +x scripts/setup/setup-make.sh
 After reorganization, update README.md with documentation links:
 
 ```markdown
-# AI Agent Social Automation
+# AI Agent Personal
 
 ## Documentation
 
@@ -425,5 +425,5 @@ workflows/{make.com,n8n}/facebook-chinese-*.json
 ---
 
 **Last Updated:** 2026-03-13
-**Version:** 1.0.0 (Adapted for AI Agent Social Automation)
+**Version:** 1.0.0 (Adapted for AI Agent Personal)
 **Author:** VictorAurelius + Claude Sonnet 4.5

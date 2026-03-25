@@ -1,4 +1,4 @@
-# Skills & Best Practices - AI Agent Social Automation
+# Skills & Best Practices - AI Agent Personal
 
 **Quick Reference Guide**
 

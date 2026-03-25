@@ -7,8 +7,8 @@ set -e
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-WORKFLOWS_DIR="$PROJECT_DIR/workflows/n8n"
-ENV_FILE="$PROJECT_DIR/docker/.env"
+WORKFLOWS_DIR="$PROJECT_DIR/modules/social/workflows"
+ENV_FILE="$PROJECT_DIR/infrastructure/docker/.env"
 
 # Colors
 GREEN='\033[0;32m'
@@ -46,7 +46,7 @@ echo "Setting up PostgreSQL credential in database..."
 POSTGRES_CRED_SQL="
 INSERT INTO public.credentials_entity (name, type, data, \"createdAt\", \"updatedAt\")
 VALUES (
-  'Social Automation DB',
+  'Agent Personal DB',
   'postgres',
   '{\"host\":\"postgres\",\"port\":5432,\"database\":\"$POSTGRES_DB\",\"user\":\"$POSTGRES_USER\",\"password\":\"$POSTGRES_PASSWORD\",\"ssl\":false}',
   NOW(),

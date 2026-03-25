@@ -23,7 +23,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [480, 280],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -35,7 +35,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [480, 480],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {

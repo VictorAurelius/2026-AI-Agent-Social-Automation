@@ -113,3 +113,4 @@ automation-*.log
 
 # === Test data ===
 test-data/
+.claude/worktrees/

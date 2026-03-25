@@ -1,4 +1,4 @@
-# Skills Index - AI Agent Social Automation
+# Skills Index - AI Agent Personal
 
 **Last Updated:** 2026-03-13
 **Total Active Skills:** 11

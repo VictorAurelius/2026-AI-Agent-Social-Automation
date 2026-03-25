@@ -119,7 +119,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=your_db_password
-      - POSTGRES_DB=social_automation
+      - POSTGRES_DB=agent_personal
     ports:
       - "5432:5432"
     volumes:
@@ -194,7 +194,7 @@ docker exec -it ollama ollama run llama3.1:8b "Hello! Write a short LinkedIn pos
 
 ```bash
 # Connect to PostgreSQL
-docker exec -it postgres psql -U postgres -d social_automation
+docker exec -it postgres psql -U postgres -d agent_personal
 ```
 
 Run the following SQL:
@@ -330,10 +330,10 @@ Level: {{context}}',
 
 ```bash
 # List tables
-docker exec -it postgres psql -U postgres -d social_automation -c "\dt"
+docker exec -it postgres psql -U postgres -d agent_personal -c "\dt"
 
 # Check prompts
-docker exec -it postgres psql -U postgres -d social_automation -c "SELECT name, platform FROM prompts;"
+docker exec -it postgres psql -U postgres -d agent_personal -c "SELECT name, platform FROM prompts;"
 ```
 
 ---
@@ -354,12 +354,12 @@ docker exec -it postgres psql -U postgres -d social_automation -c "SELECT name, 
    ```
    Host: postgres
    Port: 5432
-   Database: social_automation
+   Database: agent_personal
    User: postgres
    Password: your_db_password
    ```
 4. Test connection
-5. Save as "PostgreSQL - Social Automation"
+5. Save as "PostgreSQL - Agent Personal"
 
 ### Step 3: Create First Workflow - Content Generation
 
@@ -466,7 +466,7 @@ Create a new workflow with these nodes:
 2. Check each node output
 3. Verify content saved in PostgreSQL:
    ```bash
-   docker exec -it postgres psql -U postgres -d social_automation -c "SELECT id, title, status FROM content_queue;"
+   docker exec -it postgres psql -U postgres -d agent_personal -c "SELECT id, title, status FROM content_queue;"
    ```
 
 ---
@@ -549,7 +549,7 @@ docker logs ollama --tail 50
 
 ```bash
 # Backup PostgreSQL
-docker exec postgres pg_dump -U postgres social_automation > ~/backups/social_automation_$(date +%Y%m%d).sql
+docker exec postgres pg_dump -U postgres agent_personal > ~/backups/agent_personal_$(date +%Y%m%d).sql
 
 # Export n8n workflows (from UI)
 # n8n → Workflows → Select all → Export

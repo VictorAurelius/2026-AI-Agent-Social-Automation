@@ -34,8 +34,8 @@ fi
 
 # Test 2: .env not committed
 echo "  [2] Checking .env not in git..."
-if git ls-files --error-unmatch docker/.env 2>/dev/null; then
-  echo -e "  ${RED}FAIL - docker/.env is tracked by git!${NC}"
+if git ls-files --error-unmatch infrastructure/docker/.env 2>/dev/null; then
+  echo -e "  ${RED}FAIL - infrastructure/docker/.env is tracked by git!${NC}"
   ((ISSUES++))
 else
   echo -e "  ${GREEN}.env not tracked${NC}"
@@ -60,7 +60,7 @@ fi
 # Test 4: SQL injection in workflow queries
 echo "  [4] Checking SQL injection patterns in workflows..."
 vuln_queries=0
-for file in "$PROJECT_DIR"/workflows/n8n/*.json; do
+for file in "$PROJECT_DIR"/modules/social/workflows/*.json; do
   # Find queries with direct interpolation but no escapeSql
   queries=$(jq -r '.. | .query? // empty' "$file" 2>/dev/null | grep -E "\{\{.*\}\}" || true)
   if [ -n "$queries" ]; then
@@ -80,7 +80,7 @@ fi
 
 # Test 5: Check for exposed ports
 echo "  [5] Checking Docker port exposure..."
-compose_file="$PROJECT_DIR/docker/docker-compose.yml"
+compose_file="$PROJECT_DIR/infrastructure/docker/docker-compose.yml"
 if [ -f "$compose_file" ]; then
   exposed=$(grep -c "0.0.0.0:" "$compose_file" 2>/dev/null || echo 0)
   if [ "$exposed" -gt 0 ]; then

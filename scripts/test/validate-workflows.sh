@@ -7,7 +7,11 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
-WORKFLOW_DIR="$PROJECT_DIR/workflows/n8n"
+WORKFLOW_DIRS=(
+  "$PROJECT_DIR/modules/social/workflows"
+  "$PROJECT_DIR/modules/novel/workflows"
+  "$PROJECT_DIR/workflows/n8n"
+)
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -23,7 +27,14 @@ echo "  Workflow JSON Validation"
 echo "========================================"
 echo ""
 
+for WORKFLOW_DIR in "${WORKFLOW_DIRS[@]}"; do
+  if [ ! -d "$WORKFLOW_DIR" ]; then continue; fi
+  echo -e "${YELLOW}Directory: $WORKFLOW_DIR${NC}"
+done
+
+for WORKFLOW_DIR in "${WORKFLOW_DIRS[@]}"; do
 for file in "$WORKFLOW_DIR"/*.json; do
+  [ -f "$file" ] || continue
   filename=$(basename "$file")
   echo -n "  $filename: "
 
@@ -104,6 +115,7 @@ for file in "$WORKFLOW_DIR"/*.json; do
 
   echo -e "${GREEN}PASS ($has_nodes nodes, $has_connections connections)${NC}"
   ((PASS++))
+done
 done
 
 echo ""

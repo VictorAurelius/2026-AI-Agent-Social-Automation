@@ -1,86 +1,56 @@
-# 🤖 AI Agent Social Automation
+# AI Agent Personal
 
-> Tự động hóa nội dung cho LinkedIn & Facebook bằng AI Agent để xây dựng thương hiệu cá nhân và phát triển cộng đồng
-
----
-
-## 📖 Tổng quan
-
-Dự án này cung cấp các chiến lược chi tiết và workflow automation để:
-
-- ✅ **Tự động tạo nội dung** cho social media bằng AI (Claude, GPT)
-- ✅ **Xây dựng thương hiệu cá nhân** trên LinkedIn
-- ✅ **Phát triển Facebook Pages** về Tech và Học tiếng Trung
-- ✅ **Tối ưu quy trình** với orchestration tools (n8n, Make.com)
-- ✅ **Monetization** thông qua digital products, courses, affiliate
+> Nen tang AI assistant ca nhan voi cac module domain (social, novel) chay 100% local ($0/month) voi Docker + Ollama + n8n
 
 ---
 
-## 🎯 Mục tiêu
+## Tong quan
 
-### LinkedIn
-- Xây dựng personal brand trong lĩnh vực IT
-- Quảng bá sản phẩm phần mềm
-- Mở rộng network chuyên nghiệp
-- **Target**: 1000+ followers trong 3 tháng
+Du an nay cung cap nen tang tu dong hoa ca nhan voi cac module:
 
-### Facebook - Tech Page
-- Chia sẻ tech news, tutorials, tools
-- Audience: Developers Việt Nam
-- **Monetization**: Affiliate, digital products, courses
-- **Target**: 5000 followers trong 6 tháng
-
-### Facebook - Chinese Learning Page
-- Dạy tiếng Trung cho người Việt (HSK 1-4)
-- **Monetization**: Courses, coaching, flashcards
-- **Target**: 5000 followers trong 6 tháng
+- **Social Automation** - Tu dong tao noi dung cho LinkedIn & Facebook
+- **Novel Translation** - Dich truyen tieng Trung sang tieng Viet
+- **Common Services** - Healthcheck, Telegram bot, daily digest
 
 ---
 
-## 📂 Cấu trúc Dự án
+## Cau truc Du an
 
 ```
-.
-├── documents/                     # 📚 Tài liệu chiến lược
-│   ├── README.md                  # Hướng dẫn tổng quan
-│   ├── strategies/                # Chiến lược theo platform
-│   │   ├── linkedin/              # LinkedIn strategy
-│   │   ├── facebook-tech/         # Facebook Tech Page strategy
-│   │   └── facebook-chinese/      # Facebook Chinese Page strategy
-│   ├── tech-stack/                # Tech stack & tools overview
-│   ├── workflows/                 # Workflow documentation
-│   ├── templates/                 # Template documentation
-│   └── archived/                  # Files cũ
-│
-├── workflows/                     # 🔄 Automation workflows
-│   ├── make.com/                  # Make.com workflow exports
-│   └── n8n/                       # n8n workflow exports
-│
-├── prompts/                       # 🤖 AI prompt templates
-│   ├── linkedin/                  # LinkedIn prompts
-│   ├── facebook-tech/             # Facebook Tech prompts
-│   └── facebook-chinese/          # Facebook Chinese prompts
-│
-├── templates/                     # 🎨 Content & design templates
-│   ├── canva/                     # Canva templates
-│   └── content/                   # Content templates
-│
-├── scripts/                       # 🛠️ Utility scripts
-│   ├── setup/                     # Setup scripts
-│   ├── testing/                   # Testing scripts
-│   └── utils/                     # Utilities
-│
-├── .claude/                       # ⚙️ Claude Code configuration
-│   └── skills/                    # Project skills (see SKILLS-README.md)
-│
-├── .gitignore                     # Git ignore config
-├── README.md                      # File này
-└── SKILLS-README.md               # Skills & best practices quick reference
+ai-agent-personal/
+├── documents/                       # Tai lieu (merged, numbered)
+│   ├── 01-business/social/         # strategies, content pillars
+│   ├── 02-architecture/            # design-*.md (13 files)
+│   ├── 03-planning/                # specs, plans, superpowers
+│   ├── 04-quality/                 # bugfixes, lessons learned
+│   ├── 05-guides/                  # runbook, setup, how-to
+│   └── 07-archived/               # legacy docs
+├── infrastructure/                  # DevOps
+│   ├── docker/                     # compose, .env, init-db/
+│   ├── templates/                  # carousel, infographic, social-media
+│   └── dashboard/                  # web UI
+├── modules/
+│   ├── social/                     # Social automation
+│   │   └── workflows/             # 8 n8n workflows
+│   └── novel/                      # Novel translation
+│       ├── workflows/             # 1 n8n workflow
+│       ├── sql/                   # Novel DB schema
+│       └── glossary/              # Xianxia terms
+├── workflows/n8n/                  # Common workflows (3)
+│   ├── healthcheck.json
+│   ├── telegram-bot.json
+│   └── daily-digest.json
+├── scripts/                        # Utility scripts
+│   └── test/                      # Validation tests
+├── .claude/                        # Claude Code configuration
+├── CLAUDE.md                       # Claude Code instructions
+├── NEXT-ACTIONS.md                 # Current status + next steps
+└── SKILLS-README.md                # Skills quick reference
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core Components (100% Local - $0/month)
 
@@ -89,285 +59,137 @@ Dự án này cung cấp các chiến lược chi tiết và workflow automation
 | **Orchestration** | n8n (self-hosted WSL) | Workflow automation | $0 |
 | **AI Engine** | Ollama + Llama 3.1 8B | Content generation | $0 |
 | **Database** | PostgreSQL (local) | Content queue & metrics | $0 |
-| **Design** | Canva Free | Visual creation | $0 |
+| **Design** | HTML templates | Carousel, infographic | $0 |
 | **Publishing** | Meta Graph API, LinkedIn API | Auto-posting | Free |
-| **Notifications** | Telegram Bot | Alerts | Free |
+| **Notifications** | Telegram Bot | Alerts & control | Free |
 
-**Total**: **$0/month** (hoàn toàn miễn phí)
+**Total**: **$0/month**
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│  MÁY CHỦ LOCAL 32GB (WSL2)                      │
-├─────────────────────────────────────────────────┤
-│  Docker Compose:                                │
-│  ┌────────┐ ┌────────────┐ ┌─────────────────┐ │
-│  │  n8n   │ │ PostgreSQL │ │ Ollama          │ │
-│  │ :5678  │ │   :5432    │ │ Llama 3.1 8B    │ │
-│  └────────┘ └────────────┘ └─────────────────┘ │
-└─────────────────────────────────────────────────┘
-         ↓
-   ┌───────────┐
-   │ Facebook  │
-   │ LinkedIn  │
-   │ Telegram  │
-   └───────────┘
+Docker Compose (WSL2 or Oracle Cloud ARM)
+├── n8n (:5678)        — 12 workflows (8 social + 1 novel + 3 common)
+├── PostgreSQL (:5432) — 11 SQL init scripts
+├── Ollama (:11434)    — Llama 3.1 8B / Qwen2 14B
+└── Redis (:6379)      — Caching
+
+Modules:
+├── Social: LinkedIn, Facebook Tech, Facebook Chinese
+└── Novel: Xianxia translation (CN -> VI)
+
+Bot: Telegram (15 commands)
+Content: Posts, Quiz, Carousel, Infographic
 ```
 
-Chi tiết: [`documents/tech-stack/overview.md`](./documents/tech-stack/overview.md)
+Chi tiet: [`documents/01-business/social/tech-stack/overview.md`](./documents/01-business/social/tech-stack/overview.md)
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Đọc Tài liệu
+### 1. Setup Infrastructure
 
-Bắt đầu với [`documents/README.md`](./documents/README.md) để hiểu tổng quan.
+```bash
+# Clone and setup
+git clone <repo-url>
+cd ai-agent-personal
+bash scripts/setup.sh
+```
 
-**Chọn platform muốn triển khai:**
-- [LinkedIn Strategy](./documents/strategies/linkedin/strategy.md)
-- [Facebook Tech Page](./documents/strategies/facebook-tech/strategy.md)
-- [Facebook Chinese Page](./documents/strategies/facebook-chinese/strategy.md)
+### 2. Doc Tai lieu
 
-### 2. Review Tech Stack
+- [Tong quan du an](./documents/05-guides/tong-quan-du-an.md)
+- [Huong dan workflows](./documents/05-guides/huong-dan-workflows.md)
+- [Runbook](./documents/05-guides/runbook.md)
+- [n8n Setup Guide](./documents/05-guides/n8n-setup-guide.md)
 
-Đọc [`documents/tech-stack/overview.md`](./documents/tech-stack/overview.md) để:
-- Hiểu kiến trúc hệ thống
-- So sánh tools (n8n vs Make.com, Claude vs GPT, etc.)
-- Ước tính chi phí
-- Setup guide từng bước
+### 3. Chon Module
 
-### 3. Setup Tools (Week 1-2)
+**Social Automation:**
+- [LinkedIn Strategy](./documents/01-business/social/strategies/linkedin/strategy.md)
+- [Facebook Tech Page](./documents/01-business/social/strategies/facebook-tech/strategy.md)
+- [Facebook Chinese Page](./documents/01-business/social/strategies/facebook-chinese/strategy.md)
 
-**Week 1: Local Infrastructure**
-- [ ] Cài đặt Docker trên WSL2
-- [ ] Setup n8n + PostgreSQL + Ollama via Docker Compose
-- [ ] Pull Llama 3.1 8B model
-- [ ] Tạo Canva account (free)
-- [ ] Setup Telegram bot
-
-**Week 2: Integration**
-- [ ] Kết nối n8n với Ollama API (localhost)
-- [ ] Test workflows cơ bản
-- [ ] Tạo content templates trong Canva
-- [ ] Setup PostgreSQL databases
-
-### 4. Triển khai (Week 3+)
-
-- [ ] Chạy workflows tự động
-- [ ] Review & approve content daily
-- [ ] Đăng bài theo lịch
-- [ ] Track metrics weekly
-- [ ] Optimize dựa trên data
+**Novel Translation:**
+- [Novel Module](./modules/novel/README.md)
+- [Glossary Xianxia](./modules/novel/glossary/glossary-xianxia.md)
 
 ---
 
-## 📊 Feasibility Scores
+## Modules
 
-| Platform | Feasibility | ROI Potential | Time to Revenue |
-|----------|-------------|---------------|-----------------|
-| **LinkedIn** | 7.2/10 | Medium | 6+ months |
-| **FB Tech Page** | 7.9/10 | Medium-High | 3-6 months |
-| **FB Chinese Page** | 8.1/10 | High | 3-6 months |
+### Social Automation (`modules/social/`)
 
-**Recommended starting order:**
-1. Facebook Tech Page (dễ nhất, ROI nhanh)
-2. LinkedIn (parallel nếu có thời gian)
-3. Facebook Chinese Page (cần Chinese proficiency)
+8 workflows tu dong hoa noi dung cho 3 platforms:
 
----
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| content-generate | Manual | Tao 1 bai |
+| batch-generate | Cron Mon/Wed/Fri 8AM | Batch 5 bai |
+| facebook-post | Manual | Dang FB |
+| linkedin-post-helper | Manual | Gui LI content qua Telegram |
+| quiz-generator | Manual | Tao quiz |
+| auto-comment | Cron 30min | Auto-comment dap an |
+| data-collector | Cron 6AM | Thu thap RSS |
+| trending-detector | Cron 7AM | Phat hien trending |
 
-## 💰 Revenue Estimates
+### Novel Translation (`modules/novel/`)
 
-### Facebook Tech Page
-- Month 3: $50-100
-- Month 6: $200-500
-- Month 12: $1000+
+Dich truyen tieng Trung sang tieng Viet voi Qwen2 7B/14B:
+- Auto-fetch chapter tu web sources
+- Xianxia glossary (36+ terms)
+- Caching (khong dich lai)
+- Telegram bot integration
 
-### Facebook Chinese Page
-- Month 3: $20-50
-- Month 6: $100-250
-- Month 12: $500-1500
+### Common Workflows (`workflows/n8n/`)
 
-### LinkedIn
-- Indirect revenue (brand building, product promotion)
-- Increases opportunity value over time
-
----
-
-## 🎓 Prerequisites
-
-### For All Platforms:
-- [ ] Comfortable với automation tools (hoặc sẵn sàng học)
-- [ ] 10-15 giờ/tuần trong 3 tháng đầu
-- [ ] Máy tính 32GB RAM + WSL2 (đã có)
-- [ ] Kiên nhẫn (growth chậm 3-6 tháng đầu)
-
-### Platform-Specific:
-
-**LinkedIn:**
-- Working knowledge về IT/Software (không cần expert)
-- Có sản phẩm để promote (optional)
-
-**Facebook Tech Page:**
-- Passion về tech
-- Có thể đọc hiểu tech news
-
-**Facebook Chinese Page:**
-- ⚠️ **CRITICAL**: Chinese proficiency (HSK 4+ hoặc native)
-- Không thể fake language teaching
+| Workflow | Purpose |
+|----------|---------|
+| healthcheck | Monitor services |
+| telegram-bot | Telegram commands |
+| daily-digest | Daily summary |
 
 ---
 
-## 📈 Success Metrics
+## Scripts
 
-**Theo dõi hàng tuần:**
-- Followers growth
-- Engagement rate (>3% là tốt)
-- Post reach
-- Website clicks (nếu có)
-- Revenue (affiliate, products)
-
-**Tools:**
-- Platform native analytics (free)
-- Notion dashboards (custom)
-- Bitly for link tracking
-
----
-
-## 📚 Skills & Best Practices
-
-Dự án này sử dụng **Claude Skills** để standardize workflows và best practices:
-
-**📖 Quick Reference:** [SKILLS-README.md](./SKILLS-README.md)
-
-**📋 Complete Index:** [.claude/skills/SKILLS-INDEX.md](./.claude/skills/SKILLS-INDEX.md)
-
-**Core Skills:**
-- 🔧 [Automation Setup](./.claude/skills/automation-setup.md) - n8n + Ollama local setup guide
-- 📝 [Content Templates](./.claude/skills/content-templates.md) - Reusable templates for all platforms
-- 🤖 [Prompt Engineering](./.claude/skills/prompt-engineering.md) - AI prompt best practices
-- 🗄️ [Notion Database](./.claude/skills/notion-database.md) - Database schemas & setup
-- 📊 [Analytics Tracking](./.claude/skills/analytics-tracking.md) - Metrics & optimization
-
-**Development Skills:**
-- 💾 [Commit Workflow](./.claude/skills/commit-workflow.md) - Git commit conventions
-- 🔀 [Git & PR Workflow](./.claude/skills/git-pr-workflow.md) - Branch & PR process
-- 📁 [File Organization](./.claude/skills/ai-agent-organize.md) - Where files should go
-- 📂 [Documentation Structure](./.claude/skills/ai-agent-docs-structure.md) - How to organize docs
+| Script | Purpose |
+|--------|---------|
+| `scripts/setup.sh` | First-time Docker setup |
+| `scripts/healthcheck.sh` | Check service health |
+| `scripts/backup.sh` | Backup databases |
+| `scripts/import-workflows.sh` | Import n8n workflows |
+| `scripts/test/run-all-tests.sh` | Run all validation tests |
+| `scripts/test/validate-workflows.sh` | Validate n8n JSON |
+| `scripts/test/validate-sql.sh` | Validate SQL scripts |
+| `scripts/test/test-security.sh` | Security scan |
 
 ---
 
-## 🔐 Security & Best Practices
+## Security & Best Practices
 
-### API Keys & Credentials
-- ⚠️ **NEVER commit** API keys to git
+- NEVER commit API keys to git
 - Use `.env` files (listed in `.gitignore`)
-- Rotate keys every 6 months
-- Store in password manager (1Password, Bitwarden)
-
-### Content Quality
-- ✅ Always review AI-generated content
-- ✅ Add personal insights (not just AI output)
-- ✅ Check facts before posting
-- ✅ Maintain authentic voice
-
-### Compliance
-- ✅ Follow platform policies (LinkedIn, Facebook)
-- ✅ Disclose affiliate links
-- ✅ Don't spam or mislead
-- ✅ Respect copyright
+- Always review AI-generated content
+- Follow platform policies
 
 ---
 
-## 🤝 Contributing
-
-Dự án này là personal project. Nếu bạn muốn contribute hoặc có suggestions:
+## Contributing
 
 1. Fork repo
-2. Create feature branch
-3. Submit PR với clear description
+2. Create feature branch (`git checkout -b feature/description`)
+3. Submit PR with clear description
 
 ---
 
-## 📝 License
+## License
 
-MIT License - Free to use and modify for personal/commercial projects.
-
----
-
-## 📞 Support & Contact
-
-**Documentation**: See [`documents/`](./documents/) folder
-
-**Issues**: Open issue trong repo nếu có bug hoặc câu hỏi
+MIT License
 
 ---
 
-## 🗺️ Roadmap
-
-### Phase 1: Foundation (Current)
-- [x] Chiến lược tài liệu hoàn chỉnh
-- [x] Tech stack analysis
-- [ ] Setup tools & accounts
-- [ ] First workflows
-
-### Phase 2: MVP (Month 1-3)
-- [ ] Launch 1 platform (Facebook Tech Page recommended)
-- [ ] 100-500 followers
-- [ ] Daily posting automation
-- [ ] First affiliate revenue
-
-### Phase 3: Scale (Month 4-6)
-- [ ] Launch platform thứ 2
-- [ ] 2000-5000 followers combined
-- [ ] First digital product
-- [ ] $200-500/month revenue
-
-### Phase 4: Optimize (Month 7-12)
-- [ ] 10k+ followers combined
-- [ ] Full courses launched
-- [ ] $1000+/month revenue
-- [ ] Established authority
-
----
-
-## 🌟 Key Insights
-
-**Từ analysis:**
-
-1. **Automation is amplification, not replacement**
-   - AI làm 80% công việc
-   - Human review 100% nội dung
-   - Personal insights là điểm khác biệt
-
-2. **Consistency > Perfection**
-   - Đăng đều 3-7 bài/tuần
-   - Quality consistent hơn occasional viral posts
-
-3. **Platform choice matters**
-   - Facebook = better reach + monetization for education
-   - LinkedIn = better for B2B, career, software products
-
-4. **Patience is required**
-   - 3-6 tháng mới thấy traction
-   - Education content = slow burn
-   - Trust building takes time
-
-5. **Start small, scale gradually**
-   - 1 platform trước (không làm cả 3 cùng lúc)
-   - MVP với tools free/cheap
-   - Upgrade khi revenue justify cost
-
----
-
-**Last updated**: 2026-03-16
-**Version**: 1.0
-**Status**: Planning & Documentation Complete ✅
-
----
-
-Ready to build your AI-powered social media presence? 🚀
-
-Start with [`documents/README.md`](./documents/README.md)
+**Last updated**: 2026-03-25
+**Version**: 2.0
+**Status**: Production Ready

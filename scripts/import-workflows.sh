@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-WORKFLOWS_DIR="workflows/n8n"
+WORKFLOWS_DIR="modules/social/workflows"
 N8N_CONTAINER="n8n"
 
 echo "========================================"
