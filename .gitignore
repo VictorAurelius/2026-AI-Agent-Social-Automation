@@ -114,3 +114,6 @@ automation-*.log
 # === Test data ===
 test-data/
 .claude/worktrees/
+
+# === Diagram Tools (too large for git) ===
+documents/06-diagrams/tools/plantuml.jar

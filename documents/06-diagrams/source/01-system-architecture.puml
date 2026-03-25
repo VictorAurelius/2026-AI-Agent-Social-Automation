@@ -1,0 +1,63 @@
+@startuml 01-system-architecture
+!theme plain
+title AI Agent Personal - System Architecture
+
+skinparam componentStyle rectangle
+skinparam backgroundColor white
+
+package "WSL2 / Oracle Cloud ARM" as server {
+  package "Docker Compose" as docker {
+    component "n8n\n:5678" as n8n #LightBlue
+    component "PostgreSQL\n:5432" as pg #LightGreen
+    component "Ollama\n:11434\nLlama 3.1 / Qwen2" as ollama #Orange
+    component "Redis\n:6379" as redis #LightCoral
+  }
+
+  package "Modules" as modules {
+    component "Social Module\n8 workflows" as social #LightYellow
+    component "Novel Module\n1 workflow" as novel #Wheat
+  }
+
+  component "Common Workflows\nhealthcheck, bot, digest" as common #LightGray
+}
+
+cloud "External Services" as ext {
+  component "Telegram Bot API" as telegram
+  component "Meta Graph API\nFacebook" as facebook
+  component "LinkedIn\n(manual)" as linkedin
+  component "RSS Feeds\nHN, Dev.to, Reddit" as rss
+  component "Web Sources\nshuhaige.net" as websource
+}
+
+actor "User" as user
+
+user --> telegram : Commands
+n8n --> pg : Data
+n8n --> ollama : Generate
+n8n --> redis : Cache
+n8n --> telegram : Notifications
+n8n --> facebook : Auto-post
+n8n --> rss : Fetch news
+n8n --> websource : Fetch chapters
+social --> n8n
+novel --> n8n
+common --> n8n
+
+note right of ollama
+  Models:
+  - Llama 3.1 8B (content)
+  - Qwen2 14B (translation)
+end note
+
+note right of pg
+  Tables: 8+
+  - content_queue
+  - prompts
+  - topic_ideas
+  - metrics
+  - workflow_logs
+  - novel_registry
+  - translation_history
+  - translation_glossary
+end note
+@enduml

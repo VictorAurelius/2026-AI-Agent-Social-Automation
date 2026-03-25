@@ -1,0 +1,111 @@
+@startuml 02-database-erd
+!theme plain
+title AI Agent Personal - Database ERD
+
+skinparam backgroundColor white
+
+entity "content_queue" as cq {
+  * id : SERIAL <<PK>>
+  --
+  title : VARCHAR(255)
+  platform : VARCHAR(50)
+  content_type : VARCHAR(50)
+  pillar : VARCHAR(50)
+  status : VARCHAR(20)
+  content_format : VARCHAR(20)
+  generated_content : TEXT
+  final_content : TEXT
+  source_url : VARCHAR(500)
+  source_title : VARCHAR(255)
+  content_source : VARCHAR(50)
+  quiz_answer : JSONB
+  comment_scheduled_at : TIMESTAMP
+  comment_posted : BOOLEAN
+  scheduled_date : TIMESTAMP
+  published_date : TIMESTAMP
+  post_url : VARCHAR(500)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "prompts" as pr {
+  * id : SERIAL <<PK>>
+  --
+  name : VARCHAR(100) <<UNIQUE>>
+  platform : VARCHAR(50)
+  pillar : VARCHAR(50)
+  content_type : VARCHAR(50)
+  system_prompt : TEXT
+  user_prompt_template : TEXT
+  variables : TEXT[]
+  is_active : BOOLEAN
+}
+
+entity "topic_ideas" as ti {
+  * id : SERIAL <<PK>>
+  --
+  topic : VARCHAR(255)
+  pillar : VARCHAR(50)
+  notes : TEXT
+  priority : INTEGER
+  used : BOOLEAN
+}
+
+entity "metrics" as mt {
+  * id : SERIAL <<PK>>
+  --
+  * content_id : INTEGER <<FK>>
+  platform : VARCHAR(50)
+  impressions : INTEGER
+  likes : INTEGER
+  comments : INTEGER
+  shares : INTEGER
+  engagement_rate : DECIMAL
+}
+
+entity "workflow_logs" as wl {
+  * id : SERIAL <<PK>>
+  --
+  workflow_name : VARCHAR(100)
+  status : VARCHAR(20)
+  message : TEXT
+  details : JSONB
+  execution_time_ms : INTEGER
+}
+
+entity "novel_registry" as nr {
+  * id : SERIAL <<PK>>
+  --
+  title_cn : VARCHAR(255)
+  title_vn : VARCHAR(255)
+  author : VARCHAR(100)
+  source_site : VARCHAR(50)
+  base_url : VARCHAR(500)
+  genre : VARCHAR(50)
+}
+
+entity "translation_history" as th {
+  * id : SERIAL <<PK>>
+  --
+  * novel_id : INTEGER <<FK>>
+  chapter_number : INTEGER
+  chapter_title : VARCHAR(255)
+  original_text : TEXT
+  translated_text : TEXT
+  model_used : VARCHAR(50)
+  status : VARCHAR(20)
+}
+
+entity "translation_glossary" as tg {
+  * id : SERIAL <<PK>>
+  --
+  genre : VARCHAR(50)
+  term_cn : VARCHAR(100)
+  term_vn : VARCHAR(100)
+  pinyin : VARCHAR(100)
+  category : VARCHAR(50)
+}
+
+cq ||--o{ mt : content_id
+nr ||--o{ th : novel_id
+@enduml

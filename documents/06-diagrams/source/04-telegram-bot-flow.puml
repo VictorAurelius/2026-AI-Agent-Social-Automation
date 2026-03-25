@@ -1,0 +1,52 @@
+@startuml 04-telegram-bot-flow
+!theme plain
+title Telegram Bot - Command Flow
+
+skinparam backgroundColor white
+
+actor User
+participant "Telegram\nBot" as bot
+participant "n8n\nWF6" as n8n
+database "PostgreSQL" as db
+participant "Ollama" as ollama
+
+== Content Generation ==
+User -> bot : /generate AI tools
+bot -> n8n : Webhook trigger
+n8n -> db : Get prompt template
+n8n -> ollama : Generate content
+ollama --> n8n : Content text
+n8n -> db : INSERT content_queue
+n8n -> bot : Full content + ID
+bot -> User : Content preview\n+ /approve /reject
+
+== Content Management ==
+User -> bot : /approve 15
+bot -> n8n : Webhook trigger
+n8n -> db : UPDATE status='approved'
+n8n -> bot : Confirmation
+bot -> User : "Approved #15"
+
+== Topic Suggestion ==
+User -> bot : /suggest
+bot -> n8n : Webhook trigger
+n8n -> ollama : "Suggest 5 topics"
+ollama --> n8n : Topic list
+n8n -> bot : Formatted list
+bot -> User : 5 topic ideas
+
+== Status Check ==
+User -> bot : /status
+bot -> n8n : Webhook trigger
+n8n -> db : SELECT COUNT GROUP BY status
+n8n -> bot : Formatted stats
+bot -> User : Queue statistics
+
+== Health Check ==
+User -> bot : /health
+bot -> n8n : Webhook trigger
+n8n -> ollama : GET /api/tags
+n8n -> db : SELECT 1
+n8n -> bot : Service status
+bot -> User : Health report
+@enduml

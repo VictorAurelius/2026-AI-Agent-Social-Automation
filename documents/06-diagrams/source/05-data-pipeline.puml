@@ -1,0 +1,66 @@
+@startuml 05-data-pipeline
+!theme plain
+title Data Pipeline - RSS to Published Content
+
+skinparam backgroundColor white
+
+start
+
+partition "WF14: Trending Detection (7AM)" {
+  :Fetch HN + Reddit + GitHub;
+  :Extract tech keywords;
+  :Cross-reference (2+ sources);
+  if (Trending found?) then (yes)
+    :INSERT topic_ideas\npriority=1;
+    :Telegram: "Trending detected";
+  else (no)
+    :Skip;
+  endif
+}
+
+partition "WF13: Data Collector (6AM)" {
+  :Fetch 5 RSS feeds;
+  :Parse XML + extract articles;
+  :Filter duplicates\n(check source_url);
+  :Select top 3-5 stories;
+  :Ollama: analyze + write post;
+  :Save to content_queue\ncontent_source='rss';
+}
+
+partition "WF2: Batch Generate (8AM Mon/Wed/Fri)" {
+  :Get unused topics\n(priority ASC, LIMIT 5);
+  :Map pillar to platform;
+  repeat
+    :Get prompt template;
+    :Ollama: generate content;
+    :Save to content_queue;
+    :Mark topic as used;
+    :Wait 30s;
+  repeat while (More topics?) is (yes)
+  :Telegram: "Batch complete";
+}
+
+partition "Human Review" {
+  :Telegram: Daily Digest (9AM);
+  :User: /pending;
+  :User: /view <id>;
+  if (Quality OK?) then (approve)
+    :User: /approve <id>;
+  else (reject)
+    :User: /reject <id>;
+  endif
+}
+
+partition "Publishing" {
+  if (Platform?) then (Facebook)
+    :WF7: POST Meta Graph API;
+    :Auto-update status='published';
+  else (LinkedIn)
+    :WF8: Send to Telegram;
+    :User: copy + paste;
+    :User: /published <id> <url>;
+  endif
+}
+
+stop
+@enduml

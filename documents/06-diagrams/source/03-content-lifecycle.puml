@@ -1,0 +1,39 @@
+@startuml 03-content-lifecycle
+!theme plain
+title Content Lifecycle - Status Flow
+
+skinparam backgroundColor white
+
+state "draft" as draft #LightGray
+state "generating" as gen #LightBlue
+state "pending_review" as review #Orange
+state "approved" as approved #LightGreen
+state "rejected" as rejected #LightCoral
+state "scheduled" as scheduled #Orchid
+state "published" as published #Green
+
+[*] --> draft : Topic added\n(manual / RSS / trending)
+
+draft --> gen : WF2 Batch Generate\nWF1 Manual Generate
+gen --> review : Ollama complete\n+ save to DB
+review --> approved : /approve <id>\nvia Telegram Bot
+review --> rejected : /reject <id> <reason>\nvia Telegram Bot
+approved --> scheduled : Set scheduled_date
+approved --> published : Manual post\nor WF7 auto-post
+scheduled --> published : Cron trigger\nat scheduled time
+rejected --> draft : Regenerate\nwith new prompt
+
+published --> [*]
+
+note right of review
+  Telegram notification:
+  "New content ready for review"
+  + preview in /view <id>
+end note
+
+note right of published
+  For quiz content:
+  After 4 hours →
+  WF12 auto-comment answer
+end note
+@enduml
