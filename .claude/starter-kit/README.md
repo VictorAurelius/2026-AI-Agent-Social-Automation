@@ -72,12 +72,17 @@ Dự án A phát hiện cải tiến
 
 ```
 starter-kit/
-├── VERSION                ← Semantic versioning (1.0.0)
+├── VERSION                ← Semantic versioning (1.1.1)
 ├── CHANGELOG.md           ← Lịch sử thay đổi
 ├── README.md              ← File này
+├── EXTRACTION-GUIDE.md    ← Hướng dẫn extract thành repo riêng
 ├── init-project.sh        ← Setup dự án mới
 ├── upgrade-project.sh     ← Import vào dự án đã có (version-aware)
+├── install-remote.sh      ← Install/upgrade từ remote git repo
 ├── contribute.sh          ← Đề xuất cải tiến (proposal → review → apply)
+├── .claude-plugin/
+│   ├── plugin.json        ← Plugin metadata (name, version, skills)
+│   └── marketplace.json   ← Marketplace registration
 ├── skills/
 │   ├── core/              ← Brainstorm, TDD, Review, Debug, Breakdown
 │   ├── workflow/          ← Git, PR, CI process
@@ -103,6 +108,34 @@ starter-kit/
 | PATCH (1.0.x) | Fix bug, cải thiện nội dung | 1.0.1 |
 
 Mỗi dự án track installed version tại `.claude/.starter-kit-version`.
+
+## Distribution
+
+Starter-kit có thể cài đặt qua 3 cách:
+
+### 1. Plugin (recommended — future)
+```bash
+# Sau khi kit được extract thành repo riêng:
+/plugin install claude-starter-kit
+```
+
+### 2. Remote script
+```bash
+# Clone và cài từ GitHub
+git clone https://github.com/VictorAurelius/claude-starter-kit.git /tmp/kit
+bash /tmp/kit/install-remote.sh /path/to/project
+
+# Hoặc one-liner:
+curl -sSL https://raw.githubusercontent.com/VictorAurelius/claude-starter-kit/main/install-remote.sh | bash -s /path/to/project
+```
+
+### 3. Manual copy (legacy)
+```bash
+cp -r starter-kit/ /path/to/project/.claude/starter-kit/
+bash /path/to/project/.claude/starter-kit/init-project.sh /path/to/project
+```
+
+Xem chi tiết extraction tại [EXTRACTION-GUIDE.md](EXTRACTION-GUIDE.md).
 
 ## Lessons Learned (seed memories)
 

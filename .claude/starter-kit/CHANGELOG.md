@@ -9,7 +9,14 @@ Quản lý theo Semantic Versioning: `MAJOR.MINOR.PATCH`
 
 ## [1.1.1] — 2026-03-25
 
+### Added
+- `.claude-plugin/plugin.json` — Plugin metadata for Claude Code plugin registry
+- `.claude-plugin/marketplace.json` — Marketplace registration for discovery
+- `install-remote.sh` — Install/upgrade starter-kit from remote git repo
+- `EXTRACTION-GUIDE.md` — Step-by-step guide to extract kit to standalone repo
+
 ### Changed
+- `README.md` — Added Distribution section (3 install methods: plugin, remote script, manual)
 - `skills/reference/diagrams.md` — 4 improvements:
   - **MUST** install Graphviz (`sudo apt install graphviz`) — without it PNGs show red error
   - **MUST** use `scripts/render-diagrams.sh` to render (not `java -jar` directly)
