@@ -3,7 +3,7 @@
 **Adapted from:** organize.md (KiteClass project)
 
 ## Purpose
-Automatically determine correct location for files/folders in AI Agent Social Automation project.
+Automatically determine correct location for files/folders in AI Agent Personal project.
 
 ## Project Structure Rules
 
@@ -359,5 +359,5 @@ Before confirming location:
 ---
 
 **Last Updated:** 2026-03-13
-**Version:** 1.0.0 (Adapted for AI Agent Social Automation)
+**Version:** 1.0.0 (Adapted for AI Agent Personal)
 **Author:** VictorAurelius + Claude Sonnet 4.5

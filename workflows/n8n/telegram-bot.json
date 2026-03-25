@@ -79,7 +79,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 340],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -116,7 +116,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 480],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -153,7 +153,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 620],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -190,7 +190,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 760],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -227,7 +227,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1120, 900],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -253,7 +253,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 1040],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -304,7 +304,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1720, 1040],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -330,7 +330,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 1180],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1120, 1320],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}},
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}},
       "continueOnFail": true
     },
     {
@@ -431,7 +431,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1120, 1460],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -482,7 +482,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1120, 1660],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -564,7 +564,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 2000],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -601,7 +601,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [920, 2140],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {

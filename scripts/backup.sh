@@ -1,12 +1,12 @@
 #!/bin/bash
-# AI Agent Social Automation - Backup Script
+# AI Agent Agent Personal - Backup Script
 # Usage: ./scripts/backup.sh
 # Cron:  0 3 * * * /path/to/scripts/backup.sh >> /path/to/logs/backup.log 2>&1
 
 set -e
 
 # Configuration
-BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/social-automation}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/agent-personal}"
 DATE=$(date +%Y%m%d_%H%M%S)
 RETENTION_DAYS="${RETENTION_DAYS:-7}"
 
@@ -46,7 +46,7 @@ fi
 # Backup PostgreSQL
 echo -e "${YELLOW}[1/4] Backing up PostgreSQL...${NC}"
 POSTGRES_FILE="${BACKUP_DIR}/postgres_${DATE}.sql"
-docker exec postgres pg_dump -U postgres social_automation > "${POSTGRES_FILE}"
+docker exec postgres pg_dump -U postgres agent_personal > "${POSTGRES_FILE}"
 gzip "${POSTGRES_FILE}"
 POSTGRES_SIZE=$(du -h "${POSTGRES_FILE}.gz" | cut -f1)
 echo -e "${GREEN}✓ PostgreSQL: postgres_${DATE}.sql.gz (${POSTGRES_SIZE})${NC}"
@@ -106,5 +106,5 @@ fi
 
 echo ""
 echo "To restore PostgreSQL:"
-echo "  gunzip -c ${BACKUP_DIR}/postgres_${DATE}.sql.gz | docker exec -i postgres psql -U postgres -d social_automation"
+echo "  gunzip -c ${BACKUP_DIR}/postgres_${DATE}.sql.gz | docker exec -i postgres psql -U postgres -d agent_personal"
 echo ""

@@ -7,7 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
-SQL_DIR="$PROJECT_DIR/docker/init-db"
+SQL_DIR="$PROJECT_DIR/infrastructure/docker/init-db"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

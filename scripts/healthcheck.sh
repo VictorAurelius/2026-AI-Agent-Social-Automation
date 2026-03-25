@@ -1,5 +1,5 @@
 #!/bin/bash
-# AI Agent Social Automation - Health Check Script
+# AI Agent Agent Personal - Health Check Script
 # Usage: ./scripts/healthcheck.sh
 # Exit codes: 0 = all healthy, 1 = some unhealthy
 
@@ -32,7 +32,7 @@ fi
 
 # Check PostgreSQL
 echo -n "  PostgreSQL: "
-if docker exec postgres pg_isready -U postgres -d social_automation > /dev/null 2>&1; then
+if docker exec postgres pg_isready -U postgres -d agent_personal > /dev/null 2>&1; then
     echo -e "${GREEN}HEALTHY${NC}"
 else
     echo -e "${RED}UNHEALTHY${NC}"
@@ -70,9 +70,9 @@ docker ps --format "  {{.Names}}: {{.Status}}" | grep -E "n8n|postgres|ollama|re
 # Database stats
 echo ""
 echo -e "${BLUE}Database Stats:${NC}"
-if docker exec postgres psql -U postgres -d social_automation -t -c "SELECT 1" > /dev/null 2>&1; then
+if docker exec postgres psql -U postgres -d agent_personal -t -c "SELECT 1" > /dev/null 2>&1; then
     # Content queue stats
-    STATS=$(docker exec postgres psql -U postgres -d social_automation -t -c "
+    STATS=$(docker exec postgres psql -U postgres -d agent_personal -t -c "
         SELECT
             COALESCE(SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END), 0) as draft,
             COALESCE(SUM(CASE WHEN status = 'pending_review' THEN 1 ELSE 0 END), 0) as pending,
@@ -88,11 +88,11 @@ if docker exec postgres psql -U postgres -d social_automation -t -c "SELECT 1" >
     fi
 
     # Unused topics
-    UNUSED=$(docker exec postgres psql -U postgres -d social_automation -t -c "SELECT COUNT(*) FROM topic_ideas WHERE used = false" 2>/dev/null | tr -d ' ')
+    UNUSED=$(docker exec postgres psql -U postgres -d agent_personal -t -c "SELECT COUNT(*) FROM topic_ideas WHERE used = false" 2>/dev/null | tr -d ' ')
     echo "  Unused Topics: $UNUSED"
 
     # Active prompts
-    PROMPTS=$(docker exec postgres psql -U postgres -d social_automation -t -c "SELECT COUNT(*) FROM prompts WHERE is_active = true" 2>/dev/null | tr -d ' ')
+    PROMPTS=$(docker exec postgres psql -U postgres -d agent_personal -t -c "SELECT COUNT(*) FROM prompts WHERE is_active = true" 2>/dev/null | tr -d ' ')
     echo "  Active Prompts: $PROMPTS"
 else
     echo "  Unable to connect to database"
@@ -131,7 +131,7 @@ docker stats --no-stream --format "  {{.Name}}: CPU {{.CPUPerc}}, Mem {{.MemUsag
 # Recent errors in workflow logs
 echo ""
 echo -e "${BLUE}Recent Workflow Errors (last 24h):${NC}"
-ERROR_COUNT=$(docker exec postgres psql -U postgres -d social_automation -t -c "
+ERROR_COUNT=$(docker exec postgres psql -U postgres -d agent_personal -t -c "
     SELECT COUNT(*) FROM workflow_logs
     WHERE status = 'error'
     AND created_at > NOW() - INTERVAL '24 hours'
@@ -139,7 +139,7 @@ ERROR_COUNT=$(docker exec postgres psql -U postgres -d social_automation -t -c "
 
 if [ -n "$ERROR_COUNT" ] && [ "$ERROR_COUNT" -gt 0 ]; then
     echo -e "  ${RED}$ERROR_COUNT errors in last 24 hours${NC}"
-    docker exec postgres psql -U postgres -d social_automation -t -c "
+    docker exec postgres psql -U postgres -d agent_personal -t -c "
         SELECT workflow_name, message, created_at
         FROM workflow_logs
         WHERE status = 'error'

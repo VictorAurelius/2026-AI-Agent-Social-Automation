@@ -3,7 +3,7 @@
 **Adapted from:** development-workflow.md (KiteClass project)
 **Version:** 1.0 (AI Agent Project)
 **Last Updated:** 2026-03-13
-**Purpose:** Git workflow and pull request process for AI Agent Social Automation project
+**Purpose:** Git workflow and pull request process for AI Agent Personal project
 
 ---
 
@@ -536,5 +536,5 @@ This skill works together with:
 ---
 
 **Last Updated:** 2026-03-13
-**Version:** 1.0.0 (Adapted for AI Agent Social Automation)
+**Version:** 1.0.0 (Adapted for AI Agent Personal)
 **Author:** VictorAurelius + Claude Sonnet 4.5

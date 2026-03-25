@@ -35,7 +35,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [560, 380],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}},
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}},
       "onError": "continueRegularOutput"
     },
     {
@@ -92,7 +92,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1200, 280],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {
@@ -104,7 +104,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1200, 420],
-      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Social Automation"}}
+      "credentials": {"postgres": {"id": "1", "name": "PostgreSQL - Agent Personal"}}
     },
     {
       "parameters": {

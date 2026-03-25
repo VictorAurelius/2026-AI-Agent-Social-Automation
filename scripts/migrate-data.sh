@@ -20,7 +20,7 @@ echo "========================================"
 
 # Step 1: Backup local database
 echo -e "\n${YELLOW}[1/4] Backing up local database...${NC}"
-docker exec postgres pg_dump -U postgres social_automation > /tmp/migration_backup.sql
+docker exec postgres pg_dump -U postgres agent_personal > /tmp/migration_backup.sql
 echo -e "${GREEN}✓ Database backed up ($(wc -l < /tmp/migration_backup.sql) lines)${NC}"
 
 # Step 2: Transfer to Oracle
@@ -31,14 +31,14 @@ echo -e "${GREEN}✓ File transferred${NC}"
 # Step 3: Restore on Oracle
 echo -e "\n${YELLOW}[3/4] Restoring database on Oracle...${NC}"
 ssh -i "$SSH_KEY" "${SSH_USER}@${ORACLE_IP}" \
-  "docker exec -i postgres psql -U postgres -d social_automation < ~/migration_backup.sql"
+  "docker exec -i postgres psql -U postgres -d agent_personal < ~/migration_backup.sql"
 echo -e "${GREEN}✓ Database restored${NC}"
 
 # Step 4: Verify
 echo -e "\n${YELLOW}[4/4] Verifying...${NC}"
-LOCAL_COUNT=$(docker exec postgres psql -U postgres -d social_automation -t -c "SELECT COUNT(*) FROM content_queue" | tr -d ' ')
+LOCAL_COUNT=$(docker exec postgres psql -U postgres -d agent_personal -t -c "SELECT COUNT(*) FROM content_queue" | tr -d ' ')
 REMOTE_COUNT=$(ssh -i "$SSH_KEY" "${SSH_USER}@${ORACLE_IP}" \
-  "docker exec postgres psql -U postgres -d social_automation -t -c 'SELECT COUNT(*) FROM content_queue'" | tr -d ' ')
+  "docker exec postgres psql -U postgres -d agent_personal -t -c 'SELECT COUNT(*) FROM content_queue'" | tr -d ' ')
 
 echo "  Local content_queue:  $LOCAL_COUNT records"
 echo "  Remote content_queue: $REMOTE_COUNT records"

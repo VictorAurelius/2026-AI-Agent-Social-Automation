@@ -7,8 +7,8 @@ set -e
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-WORKFLOWS_DIR="$PROJECT_DIR/workflows/n8n"
-ENV_FILE="$PROJECT_DIR/docker/.env"
+WORKFLOWS_DIR="$PROJECT_DIR/modules/social/workflows"
+ENV_FILE="$PROJECT_DIR/infrastructure/docker/.env"
 
 # Colors
 GREEN='\033[0;32m'
@@ -77,7 +77,7 @@ POSTGRES_CRED=$(curl -s -X POST http://localhost:5678/rest/credentials \
   -H "Content-Type: application/json" \
   -H "Cookie: n8n-auth=$COOKIE" \
   -d "{
-    \"name\": \"Social Automation DB\",
+    \"name\": \"Agent Personal DB\",
     \"type\": \"postgres\",
     \"data\": {
       \"host\": \"postgres\",

@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'docs/**'
+      - 'documents/**'
       - 'README.md'
       - 'NEXT-ACTIONS.md'
 
@@ -24,7 +24,7 @@ jobs:
           ERRORS=0
 
           # Find all markdown links to local files
-          for md_file in $(find docs/ -name "*.md" 2>/dev/null); do
+          for md_file in $(find documents/ -name "*.md" 2>/dev/null); do
             # Extract relative links
             links=$(grep -oP '\[.*?\]\(\K[^)]+' "$md_file" 2>/dev/null | grep -v "^http" | grep -v "^#" || true)
 
@@ -33,7 +33,7 @@ jobs:
               # Resolve relative path
               target="$dir/$link"
               if [ ! -f "$target" ] && [ ! -f "$link" ]; then
-                echo "❌ Broken link in $md_file: $link"
+                echo "Broken link in $md_file: $link"
                 ((ERRORS++))
               fi
             done
@@ -44,7 +44,7 @@ jobs:
             echo "Found $ERRORS broken links"
             exit 1
           else
-            echo "✅ All internal links valid"
+            echo "All internal links valid"
           fi
 
       - name: Check required files exist
@@ -55,15 +55,15 @@ jobs:
           for file in \
             "README.md" \
             "NEXT-ACTIONS.md" \
-            "docs/huong-dan-workflows.md" \
-            "docs/tong-quan-du-an.md" \
-            "docs/runbook.md" \
-            "docs/content-pillars.md" \
-            "docker/README.md"; do
+            "documents/05-guides/huong-dan-workflows.md" \
+            "documents/05-guides/tong-quan-du-an.md" \
+            "documents/05-guides/runbook.md" \
+            "documents/01-business/social/content-pillars.md" \
+            "infrastructure/docker/README.md"; do
             if [ -f "$file" ]; then
-              echo "  ✅ $file"
+              echo "  $file"
             else
-              echo "  ❌ $file MISSING"
+              echo "  $file MISSING"
               ((MISSING++))
             fi
           done
@@ -74,5 +74,5 @@ jobs:
             exit 1
           else
             echo ""
-            echo "✅ All required documentation present"
+            echo "All required documentation present"
           fi

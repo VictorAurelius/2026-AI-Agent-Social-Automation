@@ -1,4 +1,4 @@
-# Next Actions - AI Agent Social Automation
+# Next Actions - AI Agent Personal
 
 **Last Updated:** 2026-03-19
 **Project Status:** All 18 PRs Merged - Ready for n8n Configuration & Go Live
@@ -65,22 +65,22 @@ Tren may co Docker, mo http://localhost:5678:
 | 10 | WF13: Data Collector | `data-collector.json` | Yes (Daily 6AM) |
 | 11 | WF14: Trending Detector | `trending-detector.json` | Yes (Daily 7AM) |
 
-**Path:** `workflows/n8n/`
+**Path:** Social: `modules/social/workflows/` | Common: `workflows/n8n/` | Novel: `modules/novel/workflows/`
 
 ### Step 2: Setup Credentials trong n8n (15 min)
 
 | Credential | Type | Settings |
 |------------|------|----------|
-| PostgreSQL | Postgres | Host: `postgres`, Port: `5432`, DB: `social_automation` |
+| PostgreSQL | Postgres | Host: `postgres`, Port: `5432`, DB: `agent_personal` |
 | Telegram Bot | Telegram | Token tu @BotFather |
 
 ### Step 3: Load Database Scripts (10 min)
 
 ```bash
 # Schema + seed data
-docker exec -i postgres psql -U postgres -d social_automation < docker/init-db/01-schema.sql
-docker exec -i postgres psql -U postgres -d social_automation < docker/init-db/02-seed-prompts.sql
-docker exec -i postgres psql -U postgres -d social_automation < docker/init-db/03-facebook-prompts.sql
+docker exec -i postgres psql -U postgres -d agent_personal < infrastructure/docker/init-db/01-schema.sql
+docker exec -i postgres psql -U postgres -d agent_personal < infrastructure/docker/init-db/02-seed-prompts.sql
+docker exec -i postgres psql -U postgres -d agent_personal < infrastructure/docker/init-db/03-facebook-prompts.sql
 ```
 
 ### Step 4: Test Telegram Bot (10 min)
@@ -177,18 +177,18 @@ docker exec -i postgres psql -U postgres -d social_automation < docker/init-db/0
 
 | Doc | Path | Lang |
 |-----|------|------|
-| Huong dan Workflows | `docs/huong-dan-workflows.md` | VN |
-| Mo ta tat ca tinh nang | `docs/mo-ta-tat-ca-tinh-nang.md` | VN |
-| Tong quan du an | `docs/tong-quan-du-an.md` | VN |
-| Content Pillars LinkedIn | `docs/content-pillars.md` | EN |
-| Content Pillars Facebook | `docs/content-pillars-facebook.md` | VN |
-| Operations Runbook | `docs/runbook.md` | EN |
-| n8n Setup Guide | `docs/n8n-setup-guide.md` | EN |
-| Design: Telegram Bot | `docs/design-telegram-bot-interactive.md` | VN |
-| Design: Auto-posting | `docs/design-auto-posting.md` | VN |
-| Design: Image Generation | `docs/design-image-generation.md` | VN |
-| Design: Facebook Plans | `docs/design-facebook-platforms.md` | VN |
-| Design: Quiz + Auto-comment | `docs/design-quiz-auto-comment.md` | VN |
+| Huong dan Workflows | `documents/05-guides/huong-dan-workflows.md` | VN |
+| Mo ta tat ca tinh nang | `documents/03-planning/mo-ta-tat-ca-tinh-nang.md` | VN |
+| Tong quan du an | `documents/05-guides/tong-quan-du-an.md` | VN |
+| Content Pillars LinkedIn | `documents/01-business/social/content-pillars.md` | EN |
+| Content Pillars Facebook | `documents/01-business/social/content-pillars-facebook.md` | VN |
+| Operations Runbook | `documents/05-guides/runbook.md` | EN |
+| n8n Setup Guide | `documents/05-guides/n8n-setup-guide.md` | EN |
+| Design: Telegram Bot | `documents/02-architecture/design-telegram-bot-interactive.md` | VN |
+| Design: Auto-posting | `documents/02-architecture/design-auto-posting.md` | VN |
+| Design: Image Generation | `documents/02-architecture/design-image-generation.md` | VN |
+| Design: Facebook Plans | `documents/02-architecture/design-facebook-platforms.md` | VN |
+| Design: Quiz + Auto-comment | `documents/02-architecture/design-quiz-auto-comment.md` | VN |
 
 ---
 
