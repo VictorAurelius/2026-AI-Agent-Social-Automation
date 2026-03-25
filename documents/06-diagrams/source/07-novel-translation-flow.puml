@@ -1,0 +1,51 @@
+@startuml 07-novel-translation-flow
+!theme plain
+title Novel Translation - Chapter Flow
+
+skinparam backgroundColor white
+
+actor User
+participant "Telegram\nBot" as bot
+participant "n8n\nWorkflow" as n8n
+database "PostgreSQL" as db
+participant "Web Source\nshuhaige.net" as web
+participant "Ollama\nQwen2" as ollama
+
+User -> bot : /translate 阵问长生 1
+bot -> n8n : Parse: novel + chapter
+
+n8n -> db : Lookup novel_registry\nWHERE title_cn='阵问长生'
+db --> n8n : base_url, source_site
+
+n8n -> db : Check translation_history\nWHERE novel_id + chapter=1
+alt Cached
+  db --> n8n : translated_text
+  n8n -> bot : Send cached translation
+  bot -> User : Chapter (instant)
+else Not cached
+  n8n -> bot : "Translating... 30-60s"
+
+  n8n -> web : Fetch chapter list page
+  web --> n8n : HTML with chapter links
+  n8n -> n8n : Parse chapter URL
+
+  n8n -> web : Fetch chapter content
+  web --> n8n : Raw HTML
+  n8n -> n8n : Extract Chinese text\nClean noise
+
+  n8n -> db : Load glossary\nWHERE genre='xianxia'
+  db --> n8n : 36+ terms
+
+  n8n -> n8n : Build prompt:\nsystem (glossary) + user (chapter)
+
+  n8n -> ollama : Translate\nmodel: qwen2:14b\ntimeout: 300s
+  ollama --> n8n : Vietnamese text
+
+  n8n -> db : INSERT translation_history\n(cache for future)
+
+  n8n -> n8n : Split if > 4096 chars
+
+  n8n -> bot : Send translation\n(multiple messages if long)
+  bot -> User : Translated chapter
+end
+@enduml

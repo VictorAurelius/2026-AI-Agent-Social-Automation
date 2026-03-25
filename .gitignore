@@ -114,3 +114,9 @@ automation-*.log
 # === Test data ===
 test-data/
 .claude/worktrees/
+
+# === Java Archives (too large for git) ===
+*.jar
+
+# === Diagram tools directory ===
+documents/06-diagrams/tools/

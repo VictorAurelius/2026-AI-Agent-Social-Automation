@@ -7,6 +7,15 @@ Quản lý theo Semantic Versioning: `MAJOR.MINOR.PATCH`
 
 ---
 
+## [1.1.1] — 2026-03-25
+
+### Changed
+- `skills/reference/diagrams.md` — 4 improvements:
+  - **MUST** install Graphviz (`sudo apt install graphviz`) — without it PNGs show red error
+  - **MUST** use `scripts/render-diagrams.sh` to render (not `java -jar` directly)
+  - **MUST** verify rendered PNGs before commit (check for syntax errors, blank images)
+  - **MUST** add `*.jar` + `documents/06-diagrams/tools/` to `.gitignore`
+
 ## [1.1.0] — 2026-03-25
 
 ### Added

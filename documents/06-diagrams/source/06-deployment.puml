@@ -1,0 +1,60 @@
+@startuml 06-deployment
+!theme plain
+title Deployment Architecture
+
+skinparam backgroundColor white
+
+node "Development (WSL2)" as dev {
+  artifact "Docker Compose" as devdocker
+  component "n8n" as devn8n
+  component "PostgreSQL" as devpg
+  component "Ollama\nLlama 3.1 8B" as devollama
+  component "Redis" as devredis
+}
+
+node "Production (Oracle Cloud ARM)" as prod {
+  component "Nginx\nReverse Proxy\nSSL" as nginx
+  artifact "Docker Compose" as proddocker
+  component "n8n" as prodn8n
+  component "PostgreSQL" as prodpg
+  component "Ollama\nQwen2 14B" as prodollama
+  component "Redis" as prodredis
+  storage "Block Storage\n200GB" as storage
+}
+
+cloud "Internet" as internet {
+  component "Telegram API" as tgapi
+  component "Facebook API" as fbapi
+  component "RSS Feeds" as rssapi
+}
+
+cloud "Backup" as backup {
+  storage "Oracle Object\nStorage 10GB" as objstore
+}
+
+dev ..> prod : scripts/migrate-data.sh
+nginx --> prodn8n : Proxy :80/:443
+prodn8n --> prodpg
+prodn8n --> prodollama
+prodn8n --> prodredis
+prodpg --> storage
+prodn8n <--> tgapi : Webhook
+prodn8n --> fbapi
+prodn8n --> rssapi
+prodpg ..> objstore : Daily backup 3AM
+
+note bottom of prod
+  Oracle Cloud Always Free:
+  4 OCPU ARM + 24GB RAM
+  200GB Block Storage
+  10TB/month outbound
+  $0/month
+end note
+
+note bottom of dev
+  WSL2 on Windows:
+  8 cores i3-14100
+  7.6GB RAM (WSL limit)
+  Local development only
+end note
+@enduml
