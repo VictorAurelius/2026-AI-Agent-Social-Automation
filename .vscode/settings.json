@@ -1,0 +1,25 @@
+{
+  // Markdown — tắt noise cho business docs
+  "markdownlint.config": {
+    "default": false
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {},
+    "cSpell.enabled": false
+  },
+  "markdown.validate.enabled": false,
+  "markdownlint.run": "onSave",
+
+  // Spell Check
+  "cSpell.language": "en,vi",
+  "cSpell.words": [
+    "ollama", "qwen", "llama", "postgresql", "xianxia",
+    "linkedin", "facebook", "telegram", "infographic"
+  ],
+  "cSpell.enableFiletypes": [
+    "!markdown"
+  ],
+
+  "editor.formatOnSave": true
+}
