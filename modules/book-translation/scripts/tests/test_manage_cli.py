@@ -86,3 +86,35 @@ class TestConsistencyScanCommand:
         result = runner.invoke(cli, ["consistency-scan", "test-book"])
         assert result.exit_code == 0
         assert "Consistency Report" in result.output or "consistency" in result.output.lower()
+
+
+class TestInterleaveBilingual:
+    def test_interleaves_paragraphs(self):
+        from manage import _interleave_bilingual
+        source = "# Title\n\nParagraph one.\n\nParagraph two."
+        translated = "# Tieu de\n\nDoan mot.\n\nDoan hai."
+        result = _interleave_bilingual(source, translated)
+        assert "[EN]" in result
+        lines = result.split("\n\n")
+        assert len(lines) >= 4
+
+    def test_handles_unequal_lengths(self):
+        from manage import _interleave_bilingual
+        source = "One.\n\nTwo.\n\nThree."
+        translated = "Mot.\n\nHai."
+        result = _interleave_bilingual(source, translated)
+        assert "Three" in result
+        assert "Hai" in result
+
+
+class TestBilingualRender:
+    def test_bilingual_creates_docx(self, runner, initialized_project, monkeypatch):
+        import manage
+        monkeypatch.setattr(manage, "PROJECTS_DIR", initialized_project.parent)
+        runner.invoke(cli, ["extract", "test-book"])
+        translated_dir = initialized_project / "translated"
+        (translated_dir / "ch01.md").write_text(
+            "---\nchapter: 1\nstatus: approved\n---\n\n# Chuong 1\n\nNoi dung dich.\n", encoding="utf-8")
+        result = runner.invoke(cli, ["render", "test-book", "--chapter", "1", "--bilingual", "--force"])
+        assert result.exit_code == 0
+        assert "Rendered" in result.output or "rendered" in result.output.lower()
