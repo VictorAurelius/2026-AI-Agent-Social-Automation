@@ -36,5 +36,60 @@ def create_sample_pdf():
     print(f"Created {FIXTURES_DIR / 'sample.pdf'}")
 
 
+def create_sample_epub():
+    """Create a small EPUB with 2 chapters for testing.
+
+    Chapter 1: includes bold and italic text.
+    Chapter 2: includes a blockquote.
+    """
+    from ebooklib import epub
+
+    book = epub.EpubBook()
+    book.set_identifier("sample-epub-001")
+    book.set_title("Sample Test Book")
+    book.set_language("en")
+    book.add_author("Test Author")
+
+    # Chapter 1 HTML content with bold, italic
+    c1 = epub.EpubHtml(title="Chapter 1: The Beginning", file_name="chap_01.xhtml", lang="en")
+    c1.content = (
+        b"<html><body>"
+        b"<h1>Chapter 1: The Beginning</h1>"
+        b"<p>This is the first paragraph of chapter one.</p>"
+        b"<p>It contains <strong>bold text</strong> for testing.</p>"
+        b"<p>It also has <em>italic text</em> for emphasis.</p>"
+        b"</body></html>"
+    )
+
+    # Chapter 2 HTML content with blockquote
+    c2 = epub.EpubHtml(title="Chapter 2: The Middle", file_name="chap_02.xhtml", lang="en")
+    c2.content = (
+        b"<html><body>"
+        b"<h1>Chapter 2: The Middle</h1>"
+        b"<p>This chapter discusses the middle part.</p>"
+        b"<blockquote><p>A wise man once said something profound.</p></blockquote>"
+        b"<p>And continues with more content for testing.</p>"
+        b"</body></html>"
+    )
+
+    book.add_item(c1)
+    book.add_item(c2)
+
+    # Table of contents
+    book.toc = (epub.Link("chap_01.xhtml", "Chapter 1", "chap01"),
+                epub.Link("chap_02.xhtml", "Chapter 2", "chap02"))
+
+    # Required navigation items
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    # Define spine (reading order)
+    book.spine = [c1, c2]
+
+    epub.write_epub(str(FIXTURES_DIR / "sample.epub"), book, {})
+    print(f"Created {FIXTURES_DIR / 'sample.epub'}")
+
+
 if __name__ == "__main__":
     create_sample_pdf()
+    create_sample_epub()

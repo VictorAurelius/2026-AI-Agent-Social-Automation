@@ -8,6 +8,7 @@ from lib.extractor import (
     detect_chapters,
     is_scanned_pdf,
     extract_to_chapters,
+    extract_epub,
 )
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -97,3 +98,56 @@ class TestExtractToChapters:
         assert len(md_files) >= 1
         content = md_files[0].read_text(encoding="utf-8")
         assert len(content) > 0
+
+
+class TestExtractEpub:
+    @pytest.fixture
+    def sample_epub(self):
+        path = FIXTURES_DIR / "sample.epub"
+        if not path.exists():
+            pytest.skip("sample.epub fixture not created yet")
+        return path
+
+    def test_extracts_chapters(self, sample_epub):
+        """EPUB extraction returns list of chapter dicts with expected fields."""
+        chapters = extract_epub(sample_epub)
+        assert len(chapters) == 2
+        assert chapters[0]["id"] == "ch01"
+        assert chapters[1]["id"] == "ch02"
+        assert "Chapter 1" in chapters[0]["title"]
+        assert "Chapter 2" in chapters[1]["title"]
+
+    def test_preserves_bold_markdown(self, sample_epub):
+        """Bold <strong> tags should be converted to **text** markdown."""
+        chapters = extract_epub(sample_epub)
+        ch1_content = chapters[0]["content"]
+        assert "**bold text**" in ch1_content
+
+    def test_preserves_italic_markdown(self, sample_epub):
+        """Italic <em> tags should be converted to *text* markdown."""
+        chapters = extract_epub(sample_epub)
+        ch1_content = chapters[0]["content"]
+        assert "*italic text*" in ch1_content
+
+    def test_preserves_blockquote(self, sample_epub):
+        """Blockquote content should be rendered with > prefix."""
+        chapters = extract_epub(sample_epub)
+        ch2_content = chapters[1]["content"]
+        assert "> " in ch2_content
+        assert "wise man" in ch2_content
+
+
+class TestExtractToChaptersEpub:
+    def test_writes_chapter_files(self, tmp_path):
+        """extract_to_chapters should handle EPUB and write chapter .md files."""
+        sample_epub = FIXTURES_DIR / "sample.epub"
+        if not sample_epub.exists():
+            pytest.skip("sample.epub fixture not created yet")
+        output_dir = tmp_path / "chapters"
+        output_dir.mkdir()
+        chapters = extract_to_chapters(sample_epub, output_dir)
+        assert len(chapters) == 2
+        md_files = sorted(output_dir.glob("ch*.md"))
+        assert len(md_files) == 2
+        content = md_files[0].read_text(encoding="utf-8")
+        assert "Chapter 1" in content

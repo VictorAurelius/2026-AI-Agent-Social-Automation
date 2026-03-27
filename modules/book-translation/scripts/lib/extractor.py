@@ -4,7 +4,7 @@ Extracts content from PDF, markdown, and text files into structured chapter data
 Supports:
   - PDF via pymupdf (fitz)
   - Markdown / plain text via chardet encoding detection
-  - EPUB: reserved for Phase 3
+  - EPUB via ebooklib + BeautifulSoup (Phase 3)
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from typing import Any
 
 import chardet
 import fitz  # pymupdf
+from bs4 import BeautifulSoup
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -243,9 +244,7 @@ def extract_to_chapters(source_path: Path, output_dir: Path) -> list[dict[str, A
         text = _read_text_file(source_path)
         chapters = _split_text_chapters(text)
     elif fmt == "epub":
-        raise ValueError(
-            "EPUB not yet implemented. Phase 3 will add EPUB support."
-        )
+        chapters = extract_epub(source_path)
     else:
         raise ValueError(f"Unhandled format: {fmt}")
 
@@ -258,6 +257,151 @@ def extract_to_chapters(source_path: Path, output_dir: Path) -> list[dict[str, A
         ch_file.write_text(md_content, encoding="utf-8")
 
     return chapters
+
+
+# ---------------------------------------------------------------------------
+# EPUB extraction
+# ---------------------------------------------------------------------------
+
+
+def extract_epub(epub_path: Path) -> list[dict[str, Any]]:
+    """Extract chapters from an EPUB file.
+
+    Uses ebooklib to read the EPUB and BeautifulSoup to parse the HTML content.
+    Converts HTML to markdown-like text preserving bold, italic, and blockquotes.
+
+    Returns:
+        List of chapter dicts (same structure as detect_chapters output):
+            id      (str) — "ch01", "ch02", …
+            title   (str) — heading text from first <h1>/<h2> in the chapter
+            content (str) — body text converted to markdown
+            page    (int) — always 0 for EPUB (no page numbers)
+    """
+    import ebooklib
+    from ebooklib import epub
+
+    book = epub.read_epub(str(epub_path), options={"ignore_ncx": True})
+
+    chapters: list[dict[str, Any]] = []
+    seq = 1
+
+    for item in book.get_items():
+        if item.get_type() != ebooklib.ITEM_DOCUMENT:
+            continue
+
+        # Skip nav documents
+        if "nav" in item.get_name().lower():
+            continue
+
+        content_bytes = item.get_content()
+        if not content_bytes:
+            continue
+
+        soup = BeautifulSoup(content_bytes, "html.parser")
+        body = soup.find("body")
+        if body is None:
+            body = soup
+
+        # Extract title from first heading
+        heading = body.find(["h1", "h2", "h3"])
+        title = heading.get_text(strip=True) if heading else f"Chapter {seq}"
+
+        # Convert body to markdown
+        content = _html_to_markdown(body)
+
+        chapters.append(
+            {
+                "id": f"ch{seq:02d}",
+                "title": title,
+                "content": content,
+                "page": 0,
+            }
+        )
+        seq += 1
+
+    return chapters
+
+
+def _html_to_markdown(element) -> str:
+    """Convert a BeautifulSoup element tree to markdown text.
+
+    Handles:
+      - <h1>-<h6>  → # heading
+      - <p>         → paragraph with inline formatting
+      - <blockquote> → > quoted text
+      - <strong>/<b> → **bold**  (handled inline)
+      - <em>/<i>    → *italic*   (handled inline)
+    """
+    lines: list[str] = []
+
+    for tag in element.children:
+        if not hasattr(tag, "name") or tag.name is None:
+            # Plain text node at block level — skip (inline text is handled per-tag)
+            continue
+
+        if tag.name in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            level = int(tag.name[1])
+            lines.append(f"{'#' * level} {tag.get_text(strip=True)}")
+        elif tag.name == "p":
+            inline_md = _inline_to_markdown(tag)
+            if inline_md.strip():
+                lines.append(inline_md.strip())
+        elif tag.name == "blockquote":
+            # Each paragraph inside blockquote becomes "> text"
+            inner_lines: list[str] = []
+            for child in tag.children:
+                if hasattr(child, "name") and child.name == "p":
+                    inner_lines.append(_inline_to_markdown(child).strip())
+                elif hasattr(child, "name") and child.name is not None:
+                    inner_lines.append(child.get_text(strip=True))
+                else:
+                    text = str(child).strip()
+                    if text:
+                        inner_lines.append(text)
+            for inner in inner_lines:
+                if inner:
+                    lines.append(f"> {inner}")
+        elif tag.name in ("div", "section", "article"):
+            # Recurse into container elements
+            nested = _html_to_markdown(tag)
+            if nested.strip():
+                lines.append(nested.strip())
+        else:
+            # Other tags — just get text
+            text = tag.get_text(strip=True)
+            if text:
+                lines.append(text)
+
+    return "\n\n".join(line for line in lines if line.strip())
+
+
+def _inline_to_markdown(element) -> str:
+    """Convert inline HTML elements within a paragraph to markdown.
+
+    Processes children of a paragraph tag, converting:
+      - <strong>/<b> → **text**
+      - <em>/<i>     → *text*
+      - Plain text nodes → as-is
+    """
+    parts: list[str] = []
+    for child in element.children:
+        if not hasattr(child, "name"):
+            # NavigableString — plain text
+            parts.append(str(child))
+        elif child.name in ("strong", "b"):
+            inner = child.get_text()
+            parts.append(f"**{inner}**")
+        elif child.name in ("em", "i"):
+            inner = child.get_text()
+            parts.append(f"*{inner}*")
+        elif child.name == "a":
+            inner = child.get_text()
+            href = child.get("href", "")
+            parts.append(f"[{inner}]({href})")
+        else:
+            # Other inline tags — just extract text
+            parts.append(child.get_text())
+    return "".join(parts)
 
 
 # ---------------------------------------------------------------------------
