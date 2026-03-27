@@ -60,7 +60,14 @@ def validate_project(project_dir: Path) -> ValidationResult:
         )
 
     # 2. Locate source and translated directories
-    source_dir = project_dir / "source"
+    # Support both project layouts:
+    #   - Simple: project_dir/source/ch*.md
+    #   - Managed: project_dir/source/chapters/ch*.md
+    _source_base = project_dir / "source"
+    if (_source_base / "chapters").exists():
+        source_dir = _source_base / "chapters"
+    else:
+        source_dir = _source_base
     translated_dir = project_dir / "translated"
 
     if not source_dir.exists():

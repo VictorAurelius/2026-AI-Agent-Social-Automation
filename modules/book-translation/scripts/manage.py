@@ -21,6 +21,7 @@ from lib.config_loader import (
 from lib.extractor import extract_to_chapters, detect_format
 from lib.merger import merge_chapters
 from lib.renderer import render_markdown_to_docx
+from lib.validator import validate_project
 
 PROJECTS_DIR = Path(__file__).parent.parent / "projects"
 
@@ -230,42 +231,102 @@ def _interleave_bilingual(source_md: str, translated_md: str) -> str:
 @cli.command()
 @click.argument("slug")
 def validate(slug):
-    """Validate project before rendering."""
+    """Validate project before rendering using comprehensive validator."""
     project_dir = PROJECTS_DIR / slug
     if not project_dir.exists():
         click.secho(f"Project '{slug}' not found!", fg="red")
         return
 
-    progress = load_progress(project_dir)
+    # Use source/chapters as the source directory for validation
+    source_dir = project_dir / "source" / "chapters"
     translated_dir = project_dir / "translated"
-    errors = []
-    warnings = []
 
-    for ch in progress["chapters"]:
-        ch_id = ch["id"]
-        sections = ch.get("sections", 1)
-        if sections <= 1:
-            f = translated_dir / f"{ch_id}.md"
-            if not f.exists():
-                errors.append(f"Missing: {f.name}")
-            elif f.stat().st_size < 10:
-                warnings.append(f"Nearly empty: {f.name}")
-        else:
-            for s in range(1, sections + 1):
-                f = translated_dir / f"{ch_id}-s{s}.md"
-                if not f.exists():
-                    errors.append(f"Missing: {f.name}")
+    # Build a temporary project-like dir structure for the validator
+    # pointing at source chapters (not the original file)
+    result = validate_project(project_dir)
 
-    if errors:
-        click.secho(f"\n{len(errors)} error(s):", fg="red")
-        for e in errors:
+    if result.errors:
+        click.secho(f"\n{len(result.errors)} error(s):", fg="red")
+        for e in result.errors:
             click.echo(f"  - {e}")
-    if warnings:
-        click.secho(f"\n{len(warnings)} warning(s):", fg="yellow")
-        for w in warnings:
+    if result.warnings:
+        click.secho(f"\n{len(result.warnings)} warning(s):", fg="yellow")
+        for w in result.warnings:
             click.echo(f"  - {w}")
-    if not errors and not warnings:
+    if result.is_valid and not result.warnings:
         click.secho("All checks passed!", fg="green")
+
+
+@cli.command()
+@click.argument("slug")
+def repair(slug):
+    """Repair progress.yaml by rebuilding from source chapters and translated frontmatter."""
+    import re as _re
+    import yaml
+
+    project_dir = PROJECTS_DIR / slug
+    if not project_dir.exists():
+        click.secho(f"Project '{slug}' not found!", fg="red")
+        return
+
+    source_dir = project_dir / "source" / "chapters"
+    translated_dir = project_dir / "translated"
+
+    if not source_dir.exists():
+        click.secho("No source chapters found. Run 'extract' first.", fg="red")
+        return
+
+    source_files = sorted(source_dir.glob("ch*.md"))
+    if not source_files:
+        click.secho("No chapter files found in source/chapters/.", fg="yellow")
+        return
+
+    # Parse frontmatter helper
+    _fm_re = _re.compile(r"^---\n(.*?)\n---\n", _re.DOTALL)
+
+    chapters = []
+    for src_file in source_files:
+        ch_id = src_file.stem  # "ch01"
+        src_content = src_file.read_text(encoding="utf-8")
+        # Extract title from first heading
+        title_match = _re.search(r"^#\s+(.+)", src_content, _re.MULTILINE)
+        title = title_match.group(1).strip() if title_match else ch_id
+        word_count = len(src_content.split())
+
+        # Determine status from translated frontmatter if present
+        status = "extracted"
+        tr_file = translated_dir / f"{ch_id}.md"
+        if tr_file.exists():
+            tr_content = tr_file.read_text(encoding="utf-8")
+            fm_match = _fm_re.match(tr_content)
+            if fm_match:
+                try:
+                    fm = yaml.safe_load(fm_match.group(1))
+                    if isinstance(fm, dict) and fm.get("status"):
+                        status = fm["status"]
+                except Exception:
+                    pass
+
+        chapters.append({
+            "id": ch_id,
+            "title": title,
+            "sections": 1,
+            "status": status,
+            "word_count_source": word_count,
+        })
+
+    progress = {
+        "status": "translating",
+        "chapters": chapters,
+    }
+
+    progress_file = project_dir / "progress.yaml"
+    with open(progress_file, "w", encoding="utf-8") as f:
+        yaml.dump(progress, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+    click.secho(f"Repaired progress.yaml with {len(chapters)} chapters:", fg="green")
+    for ch in chapters:
+        click.echo(f"  {ch['id']}: {ch['title']} — {ch['status']}")
 
 
 @cli.command("consistency-scan")

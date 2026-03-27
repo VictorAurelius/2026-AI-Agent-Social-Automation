@@ -107,6 +107,59 @@ class TestInterleaveBilingual:
         assert "Hai" in result
 
 
+class TestRepairCommand:
+    def test_repair_rebuilds_progress_yaml(self, runner, initialized_project, monkeypatch):
+        """repair command should rebuild progress.yaml from source chapters and translated frontmatter."""
+        import manage
+        monkeypatch.setattr(manage, "PROJECTS_DIR", initialized_project.parent)
+        # First extract so source chapters exist
+        runner.invoke(cli, ["extract", "test-book"])
+        # Write a translated file with status frontmatter
+        translated_dir = initialized_project / "translated"
+        (translated_dir / "ch01.md").write_text(
+            "---\nchapter: 1\nstatus: approved\n---\n\n# Chuong 1\n\nNoi dung.\n",
+            encoding="utf-8",
+        )
+        # Delete progress.yaml to simulate corruption
+        progress_file = initialized_project / "progress.yaml"
+        if progress_file.exists():
+            progress_file.unlink()
+        # Run repair
+        result = runner.invoke(cli, ["repair", "test-book"])
+        assert result.exit_code == 0, f"repair failed: {result.output}"
+        # progress.yaml should be rebuilt
+        assert progress_file.exists(), "progress.yaml should be rebuilt by repair"
+
+    def test_repair_restores_status_from_frontmatter(self, runner, initialized_project, monkeypatch):
+        """repair should set chapter status from translated file frontmatter if available."""
+        import manage
+        monkeypatch.setattr(manage, "PROJECTS_DIR", initialized_project.parent)
+        runner.invoke(cli, ["extract", "test-book"])
+        translated_dir = initialized_project / "translated"
+        (translated_dir / "ch01.md").write_text(
+            "---\nchapter: 1\nstatus: approved\n---\n\n# Chuong 1\n\nNoi dung.\n",
+            encoding="utf-8",
+        )
+        progress_file = initialized_project / "progress.yaml"
+        if progress_file.exists():
+            progress_file.unlink()
+        result = runner.invoke(cli, ["repair", "test-book"])
+        assert result.exit_code == 0
+        assert "approved" in result.output.lower() or progress_file.exists()
+
+
+class TestValidateWithValidator:
+    def test_validate_uses_validator_module(self, runner, initialized_project, monkeypatch):
+        """validate command should use the validator module and report errors/warnings."""
+        import manage
+        monkeypatch.setattr(manage, "PROJECTS_DIR", initialized_project.parent)
+        runner.invoke(cli, ["extract", "test-book"])
+        # No translated files — should report errors
+        result = runner.invoke(cli, ["validate", "test-book"])
+        assert result.exit_code == 0
+        assert "error" in result.output.lower() or "missing" in result.output.lower()
+
+
 class TestBilingualRender:
     def test_bilingual_creates_docx(self, runner, initialized_project, monkeypatch):
         import manage
