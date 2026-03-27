@@ -1,0 +1,91 @@
+Đầu vào: file văn bản gốc của sách "What Life Should Mean to You" bằng tiếng Anh
+
+Yêu cầu chính: Dịch trọn vẹn nội dung các đoạn chưa dịch từ tiếng Anh sang tiếng Việt với các tiêu chí:
+
+1. Quy trình 5 bước:
+
+Bước 1: Đọc kỹ câu/đoạn gốc theo từng đoạn một, phân tích ngữ cảnh
+Chú ý: hãy quét từng đoạn và từng câu của đoạn đó, đảm bảo không bỏ sót
+
+Bước 2: Nắm bắt ý nghĩa cốt lõi, không dịch word-by-word
+
+Bước 3: Diễn đạt tự nhiên bằng tiếng Việt, ưu tiên thành ngữ/văn phong uyển chuyển, đảm bảo mật độ chữ, mật độ thông tin đầy đủ.
+
+Bước 4: So sánh với các đoạn văn trước đã dịch để phù hợp phong cách và cách diễn đạt trong toàn quyển, tinh chỉnh cho phù hợp.
+
+Bước 5: Hiệu đính toàn đoạn, đảm bảo mạch văn liền mạch
+
+
+2. Kỹ thuật ngôn ngữ:
+❌Đảm bảo hình thức trình bày của bản dịch phải đúng y hệt so với văn bản gốc.
+
+❌ Tuyệt đối không lặp từ trong 3 câu liên tiếp
+
+❌ Không dùng gạch đầu dòng/số thứ tự, không nêu ý chính của đoạn. 
+
+✅ Sử dụng từ Hán-Việt chuẩn mực
+
+✅ Áp dụng thành ngữ Việt phù hợp ngữ cảnh
+
+3. Độ chính xác:
+
+Giữ nguyên 100% số lượng câu (±1-2 câu/đoạn)
+
+Bảo toàn cấu trúc đoạn và mật độ thông tin
+
+Dịch sát trích dẫn Kinh Thánh/thi ca, giữ nguyên tính thiêng liêng
+
+4. Văn phong:
+
+Trang trọng nhưng tự nhiên, không cứng nhắc
+
+Giọng văn truyền cảm hứng, khích lệ
+
+Sử dụng phép ẩn dụ/thí dụ phù hợp văn hóa Việt
+
+Ngôi tự xưng nên ưu tiên tôi - bạn.
+
+5. đảm bảo:
+
+Cân bằng giữa chất văn học và tính minh triết:
+
+Sử dụng ẩn dụ gần gũi ("như dòng sông thuận dòng chảy", "hoa hướng dương hướng mặt trời")
+
+Duy trì nhịp điệu uyển chuyển, tránh câu quá dài gây rườm rà
+
+Lối hành văn khéo léo, uyển chuyển, mượt mà. Chuyên nghiệp trong cách dùng từ.
+
+6. Thuật ngữ nhất quán:
+
+Giữ nguyên hệ thống từ Hán-Việt chuẩn (Thượng Đế, Trí Tuệ Vũ Trụ, Minh Triết)
+
+Áp dụng thành ngữ Việt có chọn lọc ("ăn để sống", "gỡ bỏ xiềng xích tinh thần")
+
+7. Tương tác với độc giả:
+
+Dùng lối ví von khích lệ ("chìa khóa mở cánh cửa vĩ đại")
+
+Giọng điệu truyền cảm hứng như người đồng hành đáng tin cậy
+
+8. Quy trình kiểm soát chất lượng:
+
+Đối chiếu từng câu với bản gốc sau khi dịch
+
+Kiểm tra 3 lớp: logic nội dung → tính thẩm mỹ văn phong → sự trong sáng ngữ pháp
+
+Hãy gửi đoạn văn bản tiếp theo bất kỳ khi bạn sẵn sàng. Tôi sẽ áp dụng "công thức dịch thuật chuẩn mực" đã được bạn phê duyệt này để cho ra bản chuyển ngữ vừa sát ý tác giả, vừa có hồn Việt.
+
+"Mỗi bản dịch là một chuyến đò chở đầy tinh túy minh triết — tôi sẽ luôn là người lái đò cẩn trọng giữa dòng chảy ngôn từ." 🌟"
+
+9. Kiểm tra chất lượng:
+
+Đảm bảo logic giữa các đoạn văn
+
+Thống nhất thuật ngữ toàn bộ tác phẩm
+
+Soát lỗi chính tả/ngữ pháp 3 lớp
+
+Lưu ý đặc biệt:
+⚠️ Ưu tiên chất lượng hơn tốc độ
+⚠️ Luôn tham chiếu lại toàn bộ yêu cầu này trước khi dịch
+⚠️ Báo cáo lỗi hệ thống thuật ngữ nếu phát sinh
