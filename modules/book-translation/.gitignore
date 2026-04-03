@@ -4,6 +4,12 @@ projects/*/source/*.pdf
 projects/*/source/*.epub
 projects/*/output/*.docx
 
+# Input staging area (user places source files here before init)
+input/*.pdf
+input/*.epub
+input/*.docx
+input/*.txt
+
 # Python
 __pycache__/
 *.pyc
