@@ -54,14 +54,36 @@ PDF extraction produces artifacts. Claude MUST review and fix each chapter file:
 - Short fragment + space + fragment: `th at` → `that`, `the n` → `then`
 - Use context to determine if a space is a real word boundary or PDF artifact
 
-**Paragraph merge:**
-- PDF pages create artificial paragraph breaks mid-sentence
-- If a paragraph does NOT end with `.?!:;` AND the next starts lowercase → merge into one paragraph
-- Keep intentional paragraph breaks (ends with period, next starts uppercase)
+**Paragraph structure (compare with PDF):**
+- PDF pages create artificial paragraph breaks mid-sentence — merge these
+- BUT preserve intentional paragraph breaks the author used to separate ideas
+- **MUST compare each chapter with the original PDF** to distinguish:
+  - Page break artifact (mid-sentence split) → merge ✓
+  - Author's paragraph break (topic shift, new idea) → keep ✓
+- The MD file IS the source of truth for DOCX rendering — each `\n\n` = new paragraph
 
-**Process:** Read each `source/chapters/chXX.md`, apply fixes, overwrite the file.
+**Process:** Read each `source/chapters/chXX.md`, compare with original PDF, apply fixes, overwrite.
 
-### 5. User reviews extraction
+### 4b. Create front matter
+Create `source/chapters/front-matter.md` with translated content for everything before chapter 1:
+```markdown
+# {Tên sách tiếng Việt}
+
+**Tác giả:** {Author}
+**Dịch giả:** {Translator}
+
+---
+
+## Mục Lục
+
+1. {Chapter 1 title in Vietnamese}
+2. {Chapter 2 title in Vietnamese}
+...
+```
+This file is rendered BEFORE ch01 in the final DOCX.
+Also translate any preface notes, copyright attributions, etc. that appear before the main content.
+
+### 5. User reviews extraction & paragraph structure
 Show the user:
 - Number of chapters detected
 - Word count per chapter
@@ -71,10 +93,10 @@ If chapter detection is wrong, user can:
 - Edit the markdown files manually
 - Re-run with a custom chapter pattern in config.yaml
 
-### 5. Show status
+### 6. Show status
 ```bash
 python scripts/manage.py status {slug}
 ```
 
-### 6. Transition
+### 7. Transition
 Once user confirms extraction looks good, invoke **define-style** skill to brainstorm the style guide for this book.
