@@ -1,0 +1,17 @@
+book:
+  title: The Science of Getting Rich
+  author: Wallace D. Wattles
+  slug: the-science-of-getting-rich
+  language:
+    source: en
+    target: vi
+source:
+  format: pdf
+  file: source/original.pdf
+chunking:
+  strategy: flexible
+  max_section_words: 3000
+output:
+  format: docx
+  mirror_source_format: true
+  template: null

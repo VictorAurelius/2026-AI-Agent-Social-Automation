@@ -1,0 +1,8 @@
+status: extracting
+chapters:
+- id: ch01
+  title: “The Science of Getting Rich” written by Wallace D. Wattles
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
