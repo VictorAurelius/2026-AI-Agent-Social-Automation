@@ -1,5 +1,5 @@
 # Global Glossary
 
-| English | Vietnamese | Notes |
-|---------|-----------|-------|
-|         |            |       |
+| English | Vietnamese | Context | Notes |
+|---------|-----------|---------|-------|
+|         |           |         |       |

@@ -82,13 +82,13 @@ class TestInitProgress:
         assert progress["chapters"][0]["status"] == "extracted"
         assert progress["chapters"][1]["sections"] == 1
 
-    def test_auto_sections_for_long_chapters(self, tmp_project):
+    def test_long_chapters_always_single_section(self, tmp_project):
         chapters = [
             {"id": "ch01", "title": "Long Chapter", "word_count": 9200},
         ]
         progress = init_progress(tmp_project, chapters, max_section_words=3000)
         ch = progress["chapters"][0]
-        assert ch["sections"] == 4  # ceil(9200/3000) = 4
+        assert ch["sections"] == 1  # no auto-split, user splits manually if needed
 
 
 class TestLoadConfig:
