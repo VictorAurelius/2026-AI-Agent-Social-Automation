@@ -76,19 +76,14 @@ def init_progress(
     progress_chapters = []
     for ch in chapters:
         word_count = ch.get("word_count", 0)
-        sections = math.ceil(word_count / max_section_words) if word_count > max_section_words * 2 else 1
         chapter_entry = {
             "id": ch["id"],
             "title": ch["title"],
-            "sections": sections,
+            "sections": 1,
             "status": "extracted",
             "word_count_source": word_count,
             "last_updated": str(date.today()),
         }
-        if sections > 1:
-            chapter_entry["section_status"] = [
-                {f"s{i+1}": "extracted"} for i in range(sections)
-            ]
         progress_chapters.append(chapter_entry)
 
     progress = {
