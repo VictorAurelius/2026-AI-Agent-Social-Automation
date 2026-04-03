@@ -36,6 +36,12 @@ _TEXT_PAGES_THRESHOLD = 0.10
 # How many points above the median font size a block must be to count as heading
 _HEADING_SIZE_MARGIN = 2.0
 
+# Maximum word count for a block to be considered a heading candidate
+_MAX_HEADING_WORDS = 12
+
+# Fraction of pages a block text must appear on to be considered boilerplate
+_BOILERPLATE_PAGE_THRESHOLD = 0.25
+
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -144,28 +150,82 @@ def extract_pdf(pdf_path: Path) -> list[dict[str, Any]]:
                 }
             )
 
+    total_pages = len(doc)
     doc.close()
 
     if not raw_blocks:
         return raw_blocks
 
-    # Compute median font size and mark headings
-    all_sizes = [b["font_size"] for b in raw_blocks]
-    median_size = statistics.median(all_sizes)
-    heading_threshold = median_size + _HEADING_SIZE_MARGIN
+    # --- Filter boilerplate (text repeated on many pages) ---
+    raw_blocks = _remove_boilerplate(raw_blocks, total_pages)
 
-    for block in raw_blocks:
-        block["is_heading"] = block["font_size"] >= heading_threshold
+    if not raw_blocks:
+        return raw_blocks
+
+    # --- Heading detection ---
+    # Compute median using character-weighted font sizes (body text dominates)
+    char_sizes: list[tuple[float, int]] = [
+        (b["font_size"], len(b["text"])) for b in raw_blocks
+    ]
+    total_chars = sum(c for _, c in char_sizes)
+    # Find the font size that covers the majority of text (body size)
+    size_char_counts: dict[float, int] = {}
+    for size, chars in char_sizes:
+        rounded = round(size, 1)
+        size_char_counts[rounded] = size_char_counts.get(rounded, 0) + chars
+    body_size = max(size_char_counts, key=size_char_counts.get)
+    body_char_fraction = size_char_counts[body_size] / total_chars if total_chars else 0
+
+    if body_char_fraction > 0.8:
+        # Most text is the same size — font-based heading detection won't work.
+        # Fall back to short-block heuristic: a heading is a short block
+        # whose text is <=_MAX_HEADING_WORDS and appears near page start.
+        for block in raw_blocks:
+            word_count = len(block["text"].split())
+            block["is_heading"] = word_count <= _MAX_HEADING_WORDS
+    else:
+        # Normal case: headings are larger than body text
+        heading_threshold = body_size + _HEADING_SIZE_MARGIN
+        for block in raw_blocks:
+            block["is_heading"] = block["font_size"] >= heading_threshold
 
     return raw_blocks
+
+
+def _remove_boilerplate(
+    blocks: list[dict[str, Any]], total_pages: int
+) -> list[dict[str, Any]]:
+    """Remove blocks whose text appears on too many pages (headers/footers/watermarks)."""
+    if total_pages < 4:
+        return blocks
+
+    # Count on how many distinct pages each normalized text appears
+    text_page_sets: dict[str, set[int]] = {}
+    for b in blocks:
+        normalized = b["text"].strip().lower()
+        if normalized not in text_page_sets:
+            text_page_sets[normalized] = set()
+        text_page_sets[normalized].add(b["page"])
+
+    min_pages = max(3, int(total_pages * _BOILERPLATE_PAGE_THRESHOLD))
+    boilerplate_texts = {
+        text for text, pages in text_page_sets.items() if len(pages) >= min_pages
+    }
+
+    if not boilerplate_texts:
+        return blocks
+
+    return [b for b in blocks if b["text"].strip().lower() not in boilerplate_texts]
 
 
 def detect_chapters(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Detect chapter boundaries in a list of text blocks.
 
-    A new chapter starts when a block has is_heading=True AND its text
-    matches the _CHAPTER_PATTERN.  If no such headings are found, the
-    entire content is returned as a single chapter (ch01).
+    Detection priority:
+      1. Heading blocks matching _CHAPTER_PATTERN ("Chapter N", "Part N", etc.)
+      2. Fallback: heading blocks that are short (<= _MAX_HEADING_WORDS) and
+         followed by longer body text (title-based chapters).
+      3. Last resort: all content as a single chapter.
 
     Returns:
         List of chapter dicts:
@@ -174,15 +234,19 @@ def detect_chapters(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
             content (str) — joined body text
             page    (int) — start page number
     """
-    # Locate chapter boundary blocks
+    # Priority 1: explicit chapter pattern
     chapter_indices: list[int] = [
         i
         for i, b in enumerate(blocks)
         if b["is_heading"] and _CHAPTER_PATTERN.match(b["text"].strip())
     ]
 
+    # Priority 2: heading blocks that look like chapter titles
     if not chapter_indices:
-        # No chapter pattern found — treat all content as single chapter
+        chapter_indices = _detect_title_based_chapters(blocks)
+
+    # Priority 3: single chapter fallback
+    if not chapter_indices:
         title = next(
             (b["text"] for b in blocks if b["is_heading"]),
             blocks[0]["text"] if blocks else "Chapter 1",
@@ -218,6 +282,44 @@ def detect_chapters(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
 
     return chapters
+
+
+def _detect_title_based_chapters(blocks: list[dict[str, Any]]) -> list[int]:
+    """Find chapter boundaries using short heading blocks followed by body text.
+
+    A heading block is a chapter title candidate if:
+      - is_heading is True
+      - word count <= _MAX_HEADING_WORDS
+      - no dot leaders (TOC entries like "Chapter 1.......3")
+      - followed by substantial body text (>= 100 words before next heading)
+    """
+    _TOC_DOTS = re.compile(r"\.{3,}")
+    _MIN_BODY_WORDS = 100
+
+    candidates: list[int] = []
+    for i, b in enumerate(blocks):
+        if not b["is_heading"]:
+            continue
+        word_count = len(b["text"].split())
+        if word_count > _MAX_HEADING_WORDS:
+            continue
+        # Skip TOC entries with dot leaders
+        if _TOC_DOTS.search(b["text"]):
+            continue
+        # Count body words until next heading candidate
+        body_words = 0
+        for j in range(i + 1, len(blocks)):
+            if blocks[j]["is_heading"] and len(blocks[j]["text"].split()) <= _MAX_HEADING_WORDS:
+                break
+            body_words += len(blocks[j]["text"].split())
+        if body_words >= _MIN_BODY_WORDS:
+            candidates.append(i)
+
+    # Need at least 2 chapters to consider this a valid detection
+    if len(candidates) < 2:
+        return []
+
+    return candidates
 
 
 def extract_to_chapters(source_path: Path, output_dir: Path) -> list[dict[str, Any]]:
