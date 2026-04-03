@@ -1,7 +1,115 @@
 status: extracting
 chapters:
 - id: ch01
-  title: “The Science of Getting Rich” written by Wallace D. Wattles
+  title: A note from Rhonda Byrne, creator and executive producer of
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch02
+  title: Preface
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch03
+  title: The Right To Be Rich
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch04
+  title: There is A Science of Getting Rich
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch05
+  title: Is Opportunity Monopolized?
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch06
+  title: The First Principle in The Science of Getting Rich.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch07
+  title: Increasing Life.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch08
+  title: How Riches Come to You
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch09
+  title: Gratitude.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch10
+  title: Thinking in the Certain Way.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch11
+  title: How to Use the Will.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch12
+  title: Further Use of the Will.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch13
+  title: Acting in the Certain Way.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch14
+  title: Efficient Action.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch15
+  title: Getting into the Right Business.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch16
+  title: The Impression of Increase.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch17
+  title: The Advancing Man.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch18
+  title: Some Cautions, and Concluding Observations.
+  sections: 1
+  status: extracted
+  word_count_source: 0
+  last_updated: '2026-04-03'
+- id: ch19
+  title: Summary of the Science of Getting Rich.
   sections: 1
   status: extracted
   word_count_source: 0
